@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Datasets (large binary)
+data/
+datasets/
+*.zip
+*.tar.gz
+*.tar
+*.bz2
+
+# Model weights
+models/*.pt
+models/*.engine
+models/*.onnx
+models/*.bin
+models/*.weights
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Scripts (local utility)
+_*
+
+# Jupyter
+.ipynb_checkpoints/

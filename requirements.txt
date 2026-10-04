@@ -1,0 +1,11 @@
+# Core
+opencv-python>=4.10.0
+numpy>=1.26.0
+
+# ML framework
+torch>=2.4.0
+ultralytics>=8.2.0
+
+# Utility
+tqdm>=4.66.0
+pillow>=10.4.0
