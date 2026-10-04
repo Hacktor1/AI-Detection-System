@@ -1,40 +1,40 @@
-# Testing the Detection System
+# Testování detekčního systému
 
-## Overview
-Guides for testing the dual-camera detection pipeline on both development machines
-and the Jetson Orin Nano.
+## Přehled
+Průvodce testováním dvojité kamerové detekční pipeline na vývojových počítačích
+i na Jetson Orin Nano.
 
-## Pre-Test Checklist
-- [ ] Cameras connected and detected (`/dev/video*`)
-- [ ] JetPack SDK installed on Jetson
-- [ ] Model exported to TensorRT `.engine` format
-- [ ] `requirements.txt` installed in virtual environment
+## Předtestovací kontrola
+- [ ] Kamery připojeny a detegovány (`/dev/video*`)
+- [ ] JetPack SDK nainstalován na Jetsonu
+- [ ] Model exportován jako TensorRT `.engine`
+- [ ] `requirements.txt` nainstalován v virtuálním prostředí
 
-## Test 1: Camera Detection
-Verify both cameras are detected:
+## Test 1: Detekce kamer
+Ověř, že jsou obě kamery detegovány:
 ```bash
-# List all video devices
+# Seznam všech video zařízení
 ls -la /dev/video*
 
-# Check each camera stream
-python pipeline_engineer/camera_io.py --source 0  # Camera 1
-python pipeline_engineer/camera_io.py --source 1  # Camera 2
+# Ověř každý stream kamery
+python pipeline_engineer/camera_io.py --source 0  # Kamera 1
+python pipeline_engineer/camera_io.py --source 1  # Kamera 2
 ```
 
-## Test 2: Model Inference
-Run inference on a sample image to confirm model loads:
+## Test 2: Inferenční model
+Spusť inferenci na ukázkovém obrázku pro potvrzení načtení modelu:
 ```bash
 python pipeline_engineer/detector.py --image data/test/sample.jpg --model models/best.engine
 ```
 
-Expected output:
+Očekávaný výstup:
 ```
 [detector] TensorRT engine loaded: models/best.engine
 [detector] Inference done: 2 people detected (conf: 0.85, 0.76)
 ```
 
-## Test 3: Full Dual-Camera Pipeline
-Run the complete pipeline with both streams:
+## Test 3: Kompletní dvojitá kamera pipeline
+Spusť kompletní pipeline se skvrnami:
 ```bash
 python pipeline_engineer/dual_camera_pipeline.py \
     --thermal-source /dev/video0 \
@@ -43,16 +43,16 @@ python pipeline_engineer/dual_camera_pipeline.py \
     --output-dir results/
 ```
 
-This will:
-1. Capture frames from both cameras simultaneously
-2. Run detection on each frame
-3. Overlay bounding boxes
-4. Save annotated frames + detection logs to `results/`
+Tímto se provede:
+1. Získání snímků z obou kamer najednou
+2. Spuštění detekce na každém snímku
+3. Overlay bounding boxů
+4. Uložení anotovaných snímků + detekčních logů do `results/`
 
-## Test 4: Headless Mode (Jetson)
-On the Jetson without display:
+## Test 4: Hluchý režim (Jetson)
+Na Jetsonu bez displeje:
 ```bash
-# Run without GUI display
+# Bez GUI displeje
 python pipeline_engineer/dual_camera_pipeline.py \
     --thermal-source /dev/video0 \
     --visible-source /dev/video1 \
@@ -61,17 +61,17 @@ python pipeline_engineer/dual_camera_pipeline.py \
     --output-dir /tmp/results/
 ```
 
-## Performance Metrics
-Monitor FPS and resource usage:
+## Výkonnostní metriky
+Monitoruj FPS a využití zdrojů:
 ```bash
-# GPU utilization
+# GPU využití
 tegrastats
 
-# Pipeline log will show:
+# Pipeline log ukáže:
 # [pipeline] Frame 100 | inference: 0.032s | boxes: 3
 ```
 
-## Debugging Tips
-- If one camera fails, check `dmesg | grep -i camera` for hardware errors
-- If model inference is slow, try reducing input resolution (e.g., 480x360)
-- Check thermal throttling: `cat /sys/class/thermal/thermal_zone*/temp`
+## Tip na ladění
+- Pokud jedna kamera selže, zkontroluj `dmesg | grep -i camera` pro hardware chyby
+- Pokud je inferenční model pomalý, zkus snížit rozlišení vstupu (např. 480x360)
+- Zkontroluj termický throttling: `cat /sys/class/thermal/thermal_zone*/temp`

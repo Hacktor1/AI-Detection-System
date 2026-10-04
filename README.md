@@ -1,64 +1,64 @@
-# AI-Detection-System for UAV Thermal Imaging
+# AI-Detection-System pro UAV Termální Snímání
 
-Real-time human and object detection system for drones using dual thermal
-and visible cameras, deployed on NVIDIA Jetson Orin Nano.
+Reálný systém pro detekci lidí a objektů pro drony pomocí dvojice termálních
+a viditelných kamer, nasazený na NVIDIA Jetson Orin Nano.
 
-## System Overview
+## Přehled systému
 
-| Component | Details |
+| Komponenta | Detaily |
 |-----------|---------|
-| **Hardware** | NVIDIA Jetson Orin Nano (8GB / 16GB) |
-| **Cameras** | 1× Thermal (FLIR Lepton / OAK Thermal), 1× Visible (CSI / USB) |
-| **Use Case** | Security surveillance, human detection, license plate detection |
+| **Hardwar** | NVIDIA Jetson Orin Nano (8GB / 16GB) |
+| **Kamery** | 1× Termální (FLIR Lepton / OAK Thermal), 1× Viditelné světlo (CSI / USB) |
+| **Použití** | Bezpečnostní dohled, detekce lidí, detekce SPZ |
 | **Framework** | YOLOv8/v11 → ONNX → TensorRT |
-| **Output** | Bounding boxes with class labels overlaid on camera feeds |
+| **Výstup** | Bounding boxy s štítky overlayované na kamerové streamy |
 
-## Architecture
+## Architektura
 
 ```
 ┌─────────────┐    ┌──────────────────────┐    ┌─────────────────┐
-│  Thermal    │    │  Video Processing   │    │  YOLOv8/v11     │
-│   Camera    │───▶│  Pipeline (Python) │───▶│  Detection      │
-│  (FLIR/OAK) │    │  - Dual-stream     │    │  - TensorRT      │
-└─────────────┘    │  - Preprocessing    │    │  - NMS           │
+│  Termální  │    │  Video Processing  │    │  YOLOv8/v11     │
+│   Kamera   │───▶│  Pipeline (Python)  │───▶│  Detekce       │
+│  (FLIR/OAK) │    │  - Dual-stream     │    │  - TensorRT     │
+└─────────────┘    │  - Preprocessing    │    │  - NMS         │
                    └──────────────────────┘    └────────┬────────┘
                                                           │
 ┌─────────────┐    ┌──────────────┐             ┌─────────▼─────────┐
-│  Visible    │    │  Camera I/O  │◀────────────│  Detection Output │
-│  Camera     │───▶│  (GStreamer) │             │  - Bounding Boxes │
-│  (CSI/USB)  │    └──────────────┘             │  - Class Labels   │
-└─────────────┘                                 │  - Confidence     │
+│  Viditelná │    │  Camera I/O │◀────────────│  Detekční Výstup │
+│  Kamera    │───▶│  (GStreamer) │             │  - Bounding Boxy │
+│  (CSI/USB) │    └──────────────┘             │  - Štítky       │
+└─────────────┘                                 │  - Confidence   │
                                               └─────────────────────┘
                                                           │
                                                           ▼
                                                 ┌─────────────────────┐
-                                                │  Annotated Display  │
-                                                │  (Web UI / Stream)  │
+                                                │  Annotated Display │
+                                                │  (Web UI / Stream) │
                                                 └─────────────────────┘
 ```
 
-## Repository Structure
+## Struktura repozitáře
 
-| Role | Directory | Purpose |
-|------|-----------|---------|
-| Data Engineer | `data_engineer/` | Dataset discovery, download, preprocessing |
-| AI/ML Architect | `ai_ml_architect/` | Model selection, training, hyperparameter tuning |
-| Pipeline Engineer | `pipeline_engineer/` | Dual-camera video pipeline, detection, rendering |
-| Edge Specialist | `edge_specialist/` | Model optimization, TensorRT conversion, Jetson deployment |
-| Team Lead | `team_lead/` | GitHub management, coordination docs |
+| Role | Adresář | Účel |
+|------|---------|------|
+| Data Engineer | `data_engineer/` | Objevování datasetů, stahování, předzpracování |
+| AI/ML Architekt | `ai_ml_architect/` | Výběr modelu, trénink, ladění hyperparametrů |
+| Pipeline Engineer | `pipeline_engineer/` | Dual-camera video pipeline, detekce, vykreslování |
+| Edge Specialist | `edge_specialist/` | Optimalizace modelu, TensorRT konverze, nasazení na Jetson |
+| Team Lead | `team_lead/` | GitHub správa, dokumentace koordinace |
 
-## Documentation
+## Dokumentace
 
-| Guide | Link | Description |
-|-------|------|-------------|
-| Getting Started | `docs/getting_started.md` | Environment setup (venv, dependencies) |
-| Hardware Setup | `docs/hardware_setup.md` | Bills of materials, component list |
-| Camera Wiring | `docs/camera_wiring.md` | How to connect cameras to Orin Nano |
-| JetPack Install | `docs/jetpack_install.md` | Installing JetPack SDK on Orin Nano |
-| Model Deployment | `docs/model_deployment.md` | Export to ONNX, convert to TensorRT |
-| Testing Guide | `docs/testing.md` | How to verify the full pipeline works |
+| Průvodce | Odkaz | Popis |
+|----------|-------|-------|
+| Začátečnický průvodce | `docs/getting_started.md` | Nastavení prostředí (venv, závislosti) |
+| Hardware nastavení | `docs/hardware_setup.md` | Seznam komponent, nákupní seznam |
+| Připojení kamer | `docs/camera_wiring.md` | Jak připojit kamery k Orin Nano |
+| Instalace JetPacku | `docs/jetpack_install.md` | Jak nainstalovat JetPack SDK na Orin Nano |
+| Nasazení modelu | `docs/model_deployment.md` | Export do ONNX, konverze na TensorRT |
+| Testovací průvodce | `docs/testing.md` | Jak ověřit, že celý pipeline funguje |
 
-## Quick Start
+## Rychlý start
 
 ```bash
 cd AI-Detection-System
@@ -68,43 +68,43 @@ pip install -r requirements.txt
 python pipeline_engineer/run_pipeline.py --video data/sample.mp4
 ```
 
-## Development Roadmap
+## Plán vývoje
 
-### Phase 0: Skeleton & Documentation (DONE)
-- [x] Repo structure created with role-based directories
-- [x] README and getting started guides
-- [x] Hardware/installation/testing documentation templates
+### Fáze 0: Kostra & Dokumentace (HOTOVÉ)
+- [x] Struktura repozitáře vytvořena s rolemi
+- [x] Hlavní README a začátečnický průvodce
+- [x] Šablony dokumentace pro hardware/instalaci/testování
 
-### Phase 1: Static Testing on PC
-- [ ] Collect/open-source datasets for thermal human detection
-- [ ] Train / select YOLOv8/v11 model for people + objects
-- [ ] Validate model accuracy offline on sample videos
+### Fáze 1: Statické testování na PC
+- [ ] Shromažďování veřejných datasetů pro termální detekci lidí
+- [ ] Trénink / výběr YOLOv8/v11 modelu pro lidi + objekty
+- [ ] Validace přesnosti modelu na ukázkovýchvideích
 
-### Phase 2: Simulation on Jetson (Dummy Environment)
-- [ ] Install JetPack SDK simulator or Jetson Nano
-- [ ] Simulate dual camera input with video files
-- [ ] Run pipeline and benchmark FPS / latency
+### Fáze 2: Simulace na Jetson (Testovací prostředí)
+- [ ] Instalace JetPack SDK simulátor nebo Jetson Nano
+- [ ] Simulace dual camera vstupu pomocí video souborů
+- [ ] Spuštění pipeline a benchmark FPS / latence
 
-### Phase 3: Real Hardware Integration (Orin Nano + Cameras)
-- [ ] Install JetPack 6 on Orin Nano
-- [ ] Connect both cameras (thermal + visible)
-- [ ] Convert model to TensorRT engine
-- [ ] Deploy and run full dual-camera pipeline
+### Fáze 3: Skutečná integrace hardwaru (Orin Nano + Kamery)
+- [ ] Instalace JetPack 6 na Orin Nano
+- [ ] Připojení obou kamer (termální + viditelné světlo)
+- [ ] Konverze modelu do TensorRT enginy
+- [ ] Nasazení a spuštění plné dual-camera pipeline
 
-### Phase 4: Optimization & Tuning
-- [ ] Profile GPU/CPU utilization on Orin Nano
-- [ ] Optimize model size for FP16 or INT8 inference
-- [ ] Tune confidence thresholds per camera type
+### Fáze 4: Optimalizace & Ladění
+- [ ] Profilování GPU/CPU využití na Orin Nano
+- [ ] Optimalizace velikosti modelu pro FP16 nebo INT8 inferenci
+- [ ] Ladění confidence threshold podle typu kamery
 
-### Phase 5: Feature Expansion (Future)
-- [ ] Add license plate detection (LPDR)
-- [ ] Package/object detection
-- [ ] Add web dashboard for remote monitoring
-- [ ] Integrate with MAVLink for drone telemetry
+### Fáze 5: Rozšíření funkcemi (Budoucnost)
+- [ ] Přidání detekce SPZ (LPDR)
+- [ ] Detekce balíčků / objektů
+- [ ] Přidání webového rozhraní pro vzdálený monitoring
+- [ ] Integrace s MAVLink pro telemetrii dronu
 
-## Quick Links
-- [Data Engineer Guide](data_engineer/README.md)
-- [AI/ML Architect Guide](ai_ml_architect/README.md)
-- [Pipeline Engineer Guide](pipeline_engineer/README.md)
-- [Edge Specialist Guide](edge_specialist/README.md)
-- [Team Lead Guide](team_lead/README.md)
+## Rychlé odkazy
+- [Průvodce Data Engineerem](data_engineer/README.md)
+- [Průvodce AI/ML Architektem](ai_ml_architect/README.md)
+- [Průvodce Pipeline Inženýrem](pipeline_engineer/README.md)
+- [Průvodce Edge Specialistem](edge_specialist/README.md)
+- [Průvodce Team Leadem](team_lead/README.md)

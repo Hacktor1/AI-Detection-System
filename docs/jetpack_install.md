@@ -1,57 +1,57 @@
-# JetPack SDK Installation Guide
+# Průvodce instalací JetPack SDK
 
-## Overview
-JetPack SDK is the foundational software for NVIDIA Jetson platforms,
-including Linux for Tegra (L4T), CUDA, cuDNN, TensorRT, and VisionWorks.
+## Přehled
+JetPack SDK je základní software pro platformy NVIDIA Jetson,
+včetně Linux for Tegra (L4T), CUDA, cuDNN, TensorRT a VisionWorks.
 
-## Prerequisites
+## Požadavky
 - Jetson Orin Nano Developer Kit
-- microSD card (>64GB recommended)
-- Internet connection (Ethernet preferred)
-- Host PC (for SDK Manager, optional)
+- microSD karta (>64GB doporučeno)
+- Internetové připojení (Ethernet preferováno)
+- Hostitelský PC (pro SDK Manager, volitelné)
 
-## Method 1: Using SDK Manager (Recommended)
+## Metoda 1: Pomocí SDK Manager (Doporučeno)
 
-### On Host PC:
-1. Download [NVIDIA SDK Manager](https://developer.nvidia.com/embedded/sdk-manager)
-2. Install and launch SDK Manager
-3. Select product: **Jetson Orin Nano**
-4. Choose full installation (includes OS image)
-5. Write to SD card or flash to eMMC
+### Na hostitelském PC:
+1. Stáhni [NVIDIA SDK Manager](https://developer.nvidia.com/embedded/sdk-manager)
+2. Nainstaluj a spusť SDK Manager
+3. Vyber produkt: **Jetson Orin Nano**
+4. Zvol úplnou instalaci (včetně obrazu OS)
+5. Zapsi na SD kartu nebo flash na eMMC
 
-### On Jetson:
-1. Insert SD card / power on
-2. Complete first boot wizard (language, Wi-Fi, user account)
-3. SDK Manager will install remaining components (CUDA, TensorRT, etc.)
+### Na Jetsonu:
+1. Vlož SD kartu / zapni napájení
+2. Dokonči první boot průvodce (jazyk, Wi-Fi, uživatelský účet)
+3. SDK Manager nainstaluje zbývající komponenty (CUDA, TensorRT, atd.)
 
-## Method 2: Manual SD Card Image (Alternative)
+## Metoda 2: Manuální SD karta image (Alternativa)
 
-1. Download **L4T SD Card Image** for Orin Nano from:
+1. Stáhni **L4T SD karta image** pro Orin Nano z:
    https://developer.nvidia.com/embedded/downloads
-2. Flash using [Balena Etcher](https://www.balena.io/etcher/) or `dd`
-3. Boot from SD card
-4. Complete initial setup
+2. Zapsi pomocí [Balena Etcher](https://www.balena.io/etcher/) nebo `dd`
+3. Spusť z SD karty
+4. Dokonči počáteční nastavení
 
-## After Installation
+## Po instalaci
 
-### Verify JetPack Components:
+### Ověř komponenty JetPacku:
 ```bash
-# Check CUDA
+# Kontrola CUDA
 nvcc --version
 
-# Check TensorRT
+# Kontrola TensorRT
 /usr/src/tensorrt/bin/trtexec --version
 
-# Check Vision
+# Kontrola Vision
 python3 -c "import cv2; print(cv2.cuda.getCudaEnabledDeviceCount())"
 ```
 
-### Update System:
+### Aktualizuj systém:
 ```bash
 sudo apt update && sudo apt upgrade -y
 ```
 
-## Next Steps
-After JetPack is installed and verified:
-1. See [Model Deployment Guide](model_deployment.md) to deploy your trained model.
-2. See [Camera Wiring Guide](camera_wiring.md) to connect your cameras.
+## Další kroky
+Po instalaci JetPacku a ověření:
+1. Viz [Průvodce nasazením modelu](model_deployment.md) pro nasazení trénovaného modelu.
+2. Viz [Průvodce připojením kamer](camera_wiring.md) pro připojení kamer.

@@ -1,48 +1,48 @@
-# AI/ML Architect Role
+# Rolle: AI/ML Architekt
 
-## Task Overview
+## Přehled úlohy
 
-Design, train, and evaluate the human detection model. Primary candidate: **YOLOv8** or **YOLOv11**.
+Navrhnout, trénovat a vyhodnotit model pro detekci lidí. Hlavní kandidáti: **YOLOv8** nebo **YOLOv11**.
 
-## Key Activities
+## Klíčové aktivity
 
-1. **Model Selection**
-   - Compare YOLOv8-nano, YOLOv8-small, YOLOv11-nano for edge deployment.
-   - Evaluate tradeoffs: accuracy vs. FPS on Jetson Nano/Orin.
+1. **Výběr modelu**
+   - Porovnat YOLOv8-nano, YOLOv8-small, YOLOv11-nano pro nasazení na hraní.
+   - Zhodnotit kompromisy: přesnost vs. FPS na Jetson Nano/Orin.
 
-2. **Training**
-   - Use dataset prepared by Data Engineer.
-   - Configure hyperparameters in `train/params.yaml`.
-   - Train with Ultralytics YOLO API.
+2. **Trénink**
+   - Použít dataset připravený Data Engineerem.
+   - Nastavit hyperparametry v `train/params.yaml`.
+   - Trénovat pomocí Ultralytics YOLO API.
 
-3. **Hyperparameter Tuning**
-   - Run experiments with different mosaic, scale, and augmentation settings.
-   - Log results to `experiments/` directory (or external MLflow).
+3. **Ladění hyperparametrů**
+   - Spouštět experimenty s různými nastaveními mozaiky, měřítka a augmentace.
+   - Logovat výsledky do adresáře `experiments/` (nebo externího MLflow).
 
-4. **Evaluation**
-   - Measure mAP, FPS, and thermal-specific metrics.
-   - Export best model to ONNX for Edge Specialist.
+4. **Vhodnocení**
+   - Měřit mAP, FPS a termálníspecifické metriky.
+   - Exportovat nejlepší model do ONNX pro Edge Specialisty.
 
-## Directory Layout
+## Struktura adresářů
 ```
 ai_ml_architect/
 ├── train/
-│   ├── params.yaml      # Training config
-│   └── train.py         # Entry point for training
-├── models/              # Model weights (gitignored)
-└── experiments/         # Experiment logs
+│   ├── params.yaml      # Konfigurace tréninku
+│   └── train.py         # Vstupní bod pro trénink
+├── models/              # Váhy modelu (gitignored)
+└── experiments/         # Logy experimentů
 ```
 
-## Training Command
+## Příkaz pro trénink
 ```bash
 cd ai_ml_architect
-python -m train.train  # After writing train.py
-# OR use ultralytics CLI:
+python -m train.train  # Po napsání train.py
+# NEBO použij Ultralytics CLI:
 yolo detect train data=datasets.yaml model=yolov8n.pt epochs=50
 ```
 
-## Export to ONNX (for Edge Specialist)
+## Export do ONNX (pro Edge Specialista)
 ```bash
 yolo export model=best.pt format=onnx
 ```
-Pass the `.onnx` file to Edge Specialist.
+Předávej `.onnx` soubor Edge Specialistaovi.

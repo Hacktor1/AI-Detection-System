@@ -1,29 +1,28 @@
-# Model Deployment Guide (Jetson Orin Nano)
+# Průvodce nasazením modelu (Jetson Orin Nano)
 
-## Overview
-This guide walks through exporting a trained YOLO model from PyTorch to a
-TensorRT engine optimized for inference on the Jetson Orin Nano.
+## Přehled
+Tento průvodce vede krok za krokem export trénovaného YOLO modelu z PyTorch do TensorRT enginy optimalizovaného pro inferenci na Jetson Orin Nano.
 
-## Prerequisites
-- Trained YOLOv8/v9/v11 model (`.pt` file)
-- Jetson Orin Nano with JetPack installed
-- ONNX opset installed (`onnx`, `onnx-simplifier`)
+## Požadavky
+- Trénovaný YOLOv8/v9/v11 model (`.pt` soubor)
+- Jetson Orin Nano s nainstalovaným JetPackem
+- ONNX opset nainstalován (`onnx`, `onnx-simplifier`)
 
-## Step 1: Export to ONNX
+## Krok 1: Export do ONNX
 
-On your development machine (or Jetson):
+Na tvém vývojovém počítači (nebo Jetsonu):
 ```bash
-# Using Ultralytics CLI
+# Pomocí Ultralytics CLI
 yolo export model=runs/detect/train/weights/best.pt format=onnx opset=13 simplify=true
 
-# Output: best.onnx
+# Výstup: best.onnx
 ```
 
-## Step 2: Convert ONNX to TensorRT Engine
+## Krok 2: Konverze ONNX do TensorRT Enginy
 
-On the Jetson Orin Nano:
+Na Jetson Orin Nano:
 ```bash
-# Create TensorRT engine
+# Vytvoř TensorRT engine
 /usr/src/tensorrt/bin/trtexec \
     --onnx=best.onnx \
     --saveEngine=best.engine \
@@ -33,29 +32,29 @@ On the Jetson Orin Nano:
     --optShapes=input0:16x3x640x640 \
     --maxShapes=input0:32x32x640x640
 
-# Output: best.engine
+# Výstup: best.engine
 ```
 
-## Step 3: Load and Run in Python
+## Krok 3: Načtení a spuštění v Pythonu
 
-Use `pipeline_engineer/detector.py` with TensorRT backend:
+Použij `pipeline_engineer/detector.py` s TensorRT backendem:
 ```python
-# Example usage in pipeline
+# Příklad použití v pipeline
 from detector import PersonDetector
 
 detector = PersonDetector(model_path="best.engine", conf_thres=0.4)
 boxes = detector.infer(frame)
 ```
 
-## Performance Notes
-- **YOLOv8-nano**: ~30-60 FPS @ 640x640 on Orin Nano (FP16)
-- **YOLOv11**: Better accuracy, slightly slower
-- **INT8 quantization**: Can boost FPS but requires calibration dataset
+## Poznámky k výkonu
+- **YOLOv8-nano**: ~30-60 FPS @ 640x640 na Orin Nano (FP16)
+- **YOLOv11**: Lepší přesnost, mírně pomalejší
+- **INT8 kvantizace**: Může zvýšit FPS, ale vyžaduje kalibrační dataset
 
-## Troubleshooting
-- If `trtexec` fails, check ONNX opset version (use 13 or lower for compatibility)
-- If engine creation fails, reduce `--workspace` size
-- For dynamic shapes, ensure input tensor names match ONNX
+## Řešení problémů
+- Pokud `trtexec` selže, zkontroluj verzi ONNX opsetu (použij 13 nebo nižší pro kompatibilitu)
+- Pokud vytvoření enginy selže, sniž `--workspace` velikost
+- Pro dynamické tvary, ujisti se, že názvy vstupních tensorů odpovídají ONNX
 
-## Next Steps
-After deploying the model, test with the [Dual Camera Pipeline](testing.md).
+## Další kroky
+Po nasazení modelu, testuj pomocí [Dvojité kamery pipeline](testing.md).

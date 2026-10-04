@@ -1,57 +1,53 @@
-# Hardware Setup Guide
+# Průvodce nastavením hardwaru
 
-## Required Components
+## Požadované komponenty
 
-### 1. Main Compute Module
-| Component | Model | Notes |
-|-----------|-------|-------|
-| SBC | NVIDIA Jetson Orin Nano (8GB or 16GB) | Dev Kit recommended for prototyping |
+### 1. Hlavní výpočetní modul
+| Komponenta | Model | Poznámka |
+|-----------|-------|---------|
+| SBC | NVIDIA Jetson Orin Nano (8GB nebo 16GB) | Dev Kit doporučeno pro prototypování |
 
-### 2. Cameras (Dual Camera Setup)
-| Purpose | Camera Model | Interface | Notes |
+### 2. Kamery (Dvojitý nastavení)
+| Účel | Model kamery | Rozhraní | Poznámka |
 |---------|-------------|-----------|-------|
-| Thermal Imaging | FLIR Lepton 3.5 / OAK Thermal | SPI / USB | For human/body heat detection |
-| Visible Light | OAK-D / Raspberry Pi Camera v2 | CSI / USB | For detail detection (license plates, packages) |
+| Termální snímání | FLIR Lepton 3.5 / OAK Thermal | SPI / USB | Pro detekci lidí a tepla těla |
+| Viditelné světlo | OAK-D / Raspberry Pi Camera v2 | CSI / USB | Pro detailní detekci (SPZ, balíčky) |
 
-### 3. Power Supply
-| Component | Specification |
+### 3. Napájení
+| Komponenta | Specifikace |
 |-----------|--------------|
-| Power Adapter | 12V DC, 5A minimum (for Jetson Nano) |
+| Power Adapter | 12V DC, min. 5A (pro Jetson Nano) |
 
-### 4. Storage
-| Component | Specification |
+### 4. Úložiště
+| Komponenta | Specifikace |
 |-----------|--------------|
-| microSD Card | >= 64GB, Class 10 (UHS-I or higher) |
+| microSD karta | >= 64GB, Class 10 (UHS-I nebo vyšší) |
 
-### 5. Optional (Optional but Recommended)
-| Component | Purpose |
+### 5. Volitelné (Doporučeno)
+| Komponenta | Účel |
 |-----------|---------|
-| USB Hub (with power) | For connecting peripherals |
-| HDMI Monitor | For initial setup/debugging |
-| Keyboard & Mouse | For setup |
-| USB-C to Ethernet Adapter | For stable network during development |
+| USB Hub (s napájením) | Pro připojení periferií |
+| HDMI Monitor | Pro počáteční nastavení/ladění |
+| Klávesnice & Myš | Pro nastavení |
+| USB-C k Ethernet Adapter | Pro stabilní síť během vývoje |
 
-## Connection Diagram
+## Diagram připojení
 
 ```
-+------------------+       +------------------+
-| Thermal Camera   |-------| Jetson Orin Nano |<------ Power (12V)
-| (SPI/USB)        |       | (CSI + USB 3.0)  |
-+------------------+       +--------+---------+
-                                     |
++------------------+       +------------------+\n| Termální Kamera |-------| Jetson Orin Nano |<------ Power (12V)\n| (SPI/USB)       |       | (CSI + USB 3.0)   |\n+------------------+       +--------+---------+\n                                     |
                                      |
 +------------------+                |
-| Visible Camera   |----------------+
+| Viditelná Kamera |----------------+
 | (CSI/MIPI)       |
 +------------------+
 ```
 
-## Purchase Links (Examples)
-- Jetson Orin Nano Developer Kit: ~$500-600
-- FLIR Lepton Breakout Board: ~$200-300
-- OAK Thermal (w/ lepton): ~$400-500
-- Raspberry Pi Camera v2: ~$25
+## Odkazy pro nákup (Příklady)
+- Jetson Orin Nano Developer Kit: ~500-600 USD
+- FLIR Lepton Breakout Board: ~200-300 USD
+- OAK Thermal (s leptonem): ~400-500 USD
+- Raspberry Pi Camera v2: ~25 USD
 
-## Notes
-1. Ensure you buy the version with **M.2 Key M connector** for WiFi/BT module (optional).
-2. For thermal camera, consider using **OAK Thermal** for easier integration (has built-in processing).
+## Poznámky
+1. Ujisti se, že koupíš verzi s **M.2 Key M konektorem** pro WiFi/BT modul (volitelné).
+2. Pro termální kameru zvaž použití **OAK Thermal** pro snadnější integraci (má vestavěné zpracování).

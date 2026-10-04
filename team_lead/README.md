@@ -1,40 +1,40 @@
-# Team Lead Role
+# Rolle: Team Lead
 
-## Responsibilities
+## Odpovědnosti
 
-1. **Repository Management**
-   - Create and organize the GitHub repository.
-   - Set up branch strategy (e.g., `main` + feature branches).
-   - Add team members as collaborators.
+1. **Správa repozitáře**
+   - Vytvářet a organizovat GitHub repozitář.
+   - Nastavit strategii větví (např. `main` + feature větve).
+   - Přidávat členy týmu jako spolupracovníky.
 
-2. **Issue & PR Workflow**
-   - Create issues for each subtask (data, model, pipeline, edge).
-   - Review and merge pull requests.
-   - Use labels: `role:data-engineer`, `role:ai-ml`, etc.
+2. **Workflow Issues & PR**
+   - Vytvářet issues pro každou podúlohu (data, model, pipeline, edge).
+   - Recenzovat a slučovat pull requesty.
+   - Používat štítky: `role:data-engineer`, `role:ai-ml` atd.
 
-3. **Communication & Coordination**
-   - Track progress in issues or a project board.
-   - Schedule sync-ups between role owners.
+3. **Komunikace a koordinace**
+   - Sleduovat pokrok v issues nebo project boardu.
+   - Plánovat sync setkání mezi vlastníky rolí.
 
-4. **Documentation**
-   - Maintain this centralized README.
-   - Keep architecture diagrams updated.
-   - Document decisions (e.g., YOLOv8 vs v11).
+4. **Dokumentace**
+   - Udržovat tento centralizovaný README.
+   - Aktualizovat architekturní diagramy.
+   - Dokumentovat rozhodynutí (např. YOLOv8 vs v11).
 
-## GitHub Setup
+## Nastavení GitHubu
 
 ```bash
 gh repo create AI-Detection-System --public
 git push -u origin main
-gh repo add-collaborator Hacktor1 <username>
+gh repo add-collaborator Hacktor1 <uživatelské_jméno>
 ```
 
-## Project Board Template
+## Šablona Project Board
 
-Use a GitHub Project board with columns:
+Použij GitHub Project board se sloupci:
 - `Backlog`
 - `In Progress`
 - `Review`
 - `Done`
 
-Tag items per role: `data-engineer`, `ai-ml`, `pipeline`, `edge`, `team-lead`.
+Označ položky podle rolí: `data-engineer`, `ai-ml`, `pipeline`, `edge`, `team-lead`.

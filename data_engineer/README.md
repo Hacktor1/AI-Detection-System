@@ -1,53 +1,53 @@
-# Data Engineer Role
+# Rolle: Data Engineer
 
-## Task Overview
+## Přehled úlohy
 
-Gather, validate, and preprocess open-source thermal datasets with human annotations for training the people detector.
+Zhromažďovat, ověřovat a předzpracovávat veřejné termální datasety s lidskýma anotacema pro trénink lidské detekce.
 
-## Key Activities
+## Klíčové aktivity
 
-1. **Dataset Discovery**
-   - Search public sources (Kaggle, academic repos, GitHub) for infrared/thermal datasets with human bounding boxes.
-   - Document source, license, size, and annotation format.
+1. **Objevování datasetů**
+   - Hledat veřejné zdroje (Kaggle, akademické repozitáře, GitHub) pro infračervené/termální datasety s lidskýma bounding boxy.
+   - Dokumentovat zdroj, licenci, velikost a formát anotací.
 
-2. **Download Script**
-   - Write a script to download datasets into `data_engineer/datasets/`.
-   - Handle authentication where required (Kaggle API token).
+2. **Skript pro stahování**
+   - Napsat skript pro stahování datasetů do `data_engineer/datasets/`.
+   - Zpracovat ověřování tam, kde je požadováno (Kaggle API token).
 
-3. **Preprocessing**
-   - Convert thermal images to consistent format.
-   - Normalize annotations to YOLO format (xywh, normalized 0-1).
-   - Split into train/val/test sets.
+3. **Předzpracování**
+   - Převést termální obrázky do konzistentního formátu.
+   - Normalizovat anotace do formátu YOLO (xywh, normalizované 0-1).
+   - Rozdělit na tréninkové/validační/testovací sady.
 
-4. **Validation**
-   - Verify dataset integrity (file counts, missing files).
-   - Spot-check annotations visually if possible.
+4. **Ověření**
+   - Ověřit integritu datasetu (počty souborů, chybějící soubory).
+   - Vizuálně ověřit anotace, pokud je možné.
 
-## Where to Find Datasets
+## Kde najít datasety
 
-Place downloaded datasets in:
+Umisťuj stažené datasety do:
 ```
 data_engineer/datasets/
 ```
 
-## Example Script Template
+## Šablona skriptu
 
-Create a script in this directory, named `_download_<dataset_name>.py`:
+Vytvoř skript v tomto adresáři s názvem `_download_<název_datasetu>.py`:
 ```python
 #!/usr/bin/env python3
 """
-Download script for <Dataset Name>.
-Source: <URL>
-License: <license>
+Stahovací skript pro <Název Datasetu>.
+Zdroj: <URL>
+ Licence: <licence>
 """
 import urllib.request
 import os
 
 OUTPUT = os.path.join("datasets", "raw")
 os.makedirs(OUTPUT, exist_ok=True)
-# Implement download here
+# Implementuj stahování zde
 ```
 
-## Notes
-- All scripts starting with `_` are ignored by git (see `.gitignore`).
-- Keep dataset metadata in `dataset_registry.md` within this directory.
+## Poznámky
+- Všechny skripty začínající na `_` jsou ignorovány gitem (viz `.gitignore`).
+- Udržuj metadata datasetu v `dataset_registry.md` v tomto adresáři.

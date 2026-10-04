@@ -1,14 +1,14 @@
-# Getting Started
+# Začátečnický průvodce
 
-## Prerequisites
+## Požadavky
 
 - Python 3.10+
-- pip or uv (for environment management)
+- pip nebo uv (pro správu prostředí)
 - Git
 
-## Environment Setup
+## Nastavení prostředí
 
-### Using standard venv + pip
+### Pomocí standardní venv + pip
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
@@ -16,51 +16,51 @@ pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-### Using uv (recommended)
+### Pomocí uv (doporučeno)
 ```bash
 uv venv
 source .venv/bin/activate
 uv pip install -r requirements.txt
 ```
 
-### Verify installation
+### Ověření instalace
 ```bash
 python -c "import cv2; print('OpenCV:', cv2.__version__)"
 python -c "import torch; print('PyTorch:', torch.__version__)"
 python -c "import ultralytics; print('YOLO:', ultralytics.__version__)"
 ```
 
-## Quick Start (Pipeline)
+## Rychlý start (Pipeline)
 
 ```bash
 python pipeline_engineer/run_pipeline.py --video data/sample.mp4
 ```
 
-## Project Layout
+## Struktura projektu
 
 ```
 AI-Detection-System/
 ├── docs/
-│   └── getting_started.md          # This file
+│   └── getting_started.md          # Tento soubor
 ├── data_engineer/
-│   └── datasets/                   # Downloaded datasets (gitignored)
+│   └── datasets/                   # Stažené datasety (gitignored)
 ├── ai_ml_architect/
-│   ├── train/                      # Training scripts
-│   └── models/                     # Model weights (gitignored)
+│   ├── train/                      # Tréninkové skripty
+│   └── models/                     # Váhy modelu (gitignored)
 ├── pipeline_engineer/
-│   ├── camera_io.py                # Camera input handling
-│   ├── detector.py                 # Detection inference
-│   ├── renderer.py                 # Bounding box overlay
-│   └── run_pipeline.py             # Main pipeline
+│   ├── camera_io.py                # Obsluha kamer
+│   ├── detector.py                 # Inferenční engine detekce
+│   ├── renderer.py                 # Overlay bounding boxů
+│   └── run_pipeline.py             # Hlavní pipeline
 ├── edge_specialist/
-│   └── tensorrt/                   # Conversion scripts
+│   └── tensorrt/                   # Konverzní skripty
 ├── team_lead/
-│   └── coordination.md             # Team coordination notes
+│   └── coordination.md             # Poznámky koordinace týmu
 ├── requirements.txt
 ├── .gitignore
 └── README.md
 ```
 
-## Notes
-- The `data/` and `models/` directories are intentionally gitignored (large binaries).
-- The `_*` pattern in `.gitignore` excludes local utility scripts.
+## Poznámky
+- Slovníky `data/` a `models/` jsou úmyslně gitignored (velké binární soubory).
+- Pattern `_*` v `.gitignore` vylučuje místní nástrojové skripty.

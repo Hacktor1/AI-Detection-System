@@ -1,45 +1,45 @@
-# Pipeline Engineer Role
+# Rolle: Pipeline Inženýr
 
-## Task Overview
+## Přehled úlohy
 
-Build the main video processing pipeline that loads thermal camera video, runs detection, and renders bounding boxes. This is the integration point for Data Engineer (datasets), AI/ML Architect (model), and Edge Specialist (optimized model).
+Vytvořit hlavní video pipeline, která načítá termální video z kamer, spouští detekci a vykresluje bounding boxy. Je to integrační bod pro Data Engineera (datasety), AI/ML Architekta (model) a Edge Specialista (optimalizovaný model).
 
-## Key Activities
+## Klíčové aktivity
 
-1. **Camera Input Handling** (`camera_io.py`)
-   - Read from video files (for testing).
-   - Interface for dual camera streams.
-   - Later: connect to Jetson CSI/MIPI camera.
+1. **Obsluha vstupu z kamer** (`camera_io.py`)
+   - Číst z video souborů (pro testování).
+   - Rozhraní pro dual camera streamy.
+   - Později: připojení k Jetson CSI/MIPI kameře.
 
-2. **Detection Inference** (`detector.py`)
-   - Load YOLO model (ONNX or PyTorch).
-   - Run inference on frames.
-   - Return bounding boxes, scores, classes.
+2. **Inferenční detekce** (`detector.py`)
+   - Načíst YOLO model (ONNX nebo PyTorch).
+   - Spouštět inferenci na snímcích.
+   - Vracet bounding boxy, skóre, třídy.
 
-3. **Rendering** (`renderer.py`)
-   - Overlay bounding boxes on the thermal frame.
-   - Handle dual camera visualization.
+3. **Vykreslování** (`renderer.py`)
+   - Overlay bounding boxů na termální snímek.
+   - Zpracování vizualizace dvou kamer.
 
-4. **Main Loop** (`run_pipeline.py`)
-   - Orchestrate: capture → detect → render.
-   - CLI args for input file, model path, output directory.
+4. **Hlavní smyčka** (`run_pipeline.py`)
+   - Orchestrace: zachytřit → detekovat → vykreslit.
+   - CLI argumenty pro vstupní soubor, cestu k modelu, výstupní adresář.
 
-## Directory Layout
+## Struktura adresářů
 ```
 pipeline_engineer/
-├── camera_io.py       # Camera/stream reader
-├── detector.py        # Model inference wrapper
-├── renderer.py        # Bounding box drawer
-├── run_pipeline.py    # Main pipeline entry point
-└── sample_data/       # Small sample videos for testing (gitignored)
+├── camera_io.py       # Čtečka kamer/streamerů
+├── detector.py        # Obalový interface pro inferenci modelu
+├── renderer.py        # Kreslič bounding boxů
+├── run_pipeline.py    # Hlavní vstupní bod pipeline
+└── sample_data/       # Malé ukázkové videa pro testování (gitignored)
 ```
 
-## Quick Test
+## Rychlý test
 ```bash
 cd pipeline_engineer
 python run_pipeline.py --video sample_data/test_thermal.mp4 --model ../ai_ml_architect/models/best.onnx
 ```
 
-## Notes
-- For initial testing, any MP4 video works as input.
-- Model can be `.engine` (TensorRT) when deployed on Jetson.
+## Poznámky
+- Pro počáteční testování funguje jakýkoli MP4 jako vstup.
+- Model může být `.engine` (TensorRT) při nasazení na Jetsonu.

@@ -1,21 +1,21 @@
-# Camera Wiring Guide
+# Průvodce připojením kamer
 
-## Overview
-This guide explains how to connect two cameras (thermal + visible) to the Jetson Orin Nano.
+## Přehled
+Tento průvodce vysvětluje, jak připojit dvě kamery (termální + viditelné světlo) k Jetson Orin Nano.
 
-## Jetson Orin Nano Camera Ports
+## Porty kamer na Jetson Orin Nano
 
-| Port Type | Quantity | Description |
+| Typ portu | Množství | Popis |
 |-----------|----------|-------------|
-| CSI-2 (MIPI) | 1x | Dedicated camera interface (high bandwidth) |
-| USB 3.0 | 2x | Standard USB port (supports webcams) |
-| USB 2.0 | 1x | Lower speed USB |
+| CSI-2 (MIPI) | 1× | Vyhrazené rozhraní kamery (vysoká propustnost) |
+| USB 3.0 | 2× | Standardní USB port (podporuje webkamery) |
+| USB 2.0 | 1× | Nižší rychlost USB |
 
-## Wiring Setup
+## Nastavení připojení
 
-### Option A: CSI + USB (Recommended)
-- **Visible Camera** → CSI port (for highest performance)
-- **Thermal Camera** → USB 3.0 port
+### Možnost A: CSI + USB (Doporučeno)
+- **Viditelná kamera** → CSI port (pro nejvyšší výkon)
+- **Termální kamera** → USB 3.0 port
 
 ```
          Jetson Orin Nano
@@ -24,48 +24,48 @@ This guide explains how to connect two cameras (thermal + visible) to the Jetson
     |     |              |    |
     |   [CAM0]       [USB-A] |
     |     |              |    |
-    |  Visible      Thermal   |
+    |  Viditelná    Termální  |
     +-------------------------+
 ```
 
-### Option B: Dual USB
-If using two USB cameras:
-- Both cameras → USB 3.0 ports
-- May need powered USB hub if power draw exceeds USB limits
+### Možnost B: Dvojité USB
+Pokud používáš dvě USB kamery:
+- Obě kamery → USB 3.0 porty
+- Může být potřeba napájený USB hub, pokud příkon přesahuje limity USB
 
-## Supported Cameras
+## Podporované kamery
 
-### CSI Cameras
+### CSI kamery
 - Raspberry Pi Camera Module v2 (Sony IMX219)
 - ArduCam IMX219/MIPI
 - Leopard Imaging LI-OV5640
 
-### USB Cameras
+### USB kamery
 - FLIR Blackfly (USB3)
-- OAK-D Series
+- OAK-D série
 - Logitech C920/C922
-- Generic UVC webcams
+- Generické UVC webkamery
 
-### Thermal Cameras
-- FLIR Lepton (via breakout board + SPI-to-USB adapter)
+### Termální kamery
+- FLIR Lepton (přes breakout board + SPI-to-USB adapter)
 - OAK Thermal (USB3)
-- Seek Thermal (USB OTG, limited support)
+- Seek Thermal (USB OTG, omezená podpora)
 
-## Initial Test
+## Prvotní test
 
-After connecting cameras, verify detection:
+Po připojení kamer ověř detekci:
 ```bash
-# List CSI devices
+# Seznam všech video zařízení
 ls /dev/video*
 
-# List USB devices
+# Seznam USB zařízení
 lsusb
 
-# Check camera info
+# Kontrola informací o kameře
 v4l2-ctl --list-devices
 ```
 
-If cameras appear in `/dev/video*`, they are detected by the system.
+Pokud se kamery objeví v `/dev/video*`, systém je deteguje.
 
-## Next Steps
-See [Jetpack Installation Guide](jetpack_install.md) to set up the OS and drivers.
+## Další kroky
+Viz [Průvodce instalací JetPacku](jetpack_install.md) pro nastavení OS a ovladačů.
