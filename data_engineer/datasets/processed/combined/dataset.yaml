@@ -1,0 +1,12 @@
+# Combined UAV Thermal Detection Dataset (person + car + bicycle)
+# Generated from FLIR ADAS, LLVIP, and Thermal Person Detector datasets
+path: /home/hacktor/Projects/GitHub-Hacktor1/AI-Detection-System/data_engineer/datasets/processed  # Root directory containing all dataset folders
+
+train: combined/train.txt
+val:   combined/val.txt
+
+# Number of classes: person, car, bicycle, dog, other_vehicle
+nc: 5
+
+# Class names (unified across all datasets)
+names: ['person', 'car', 'bicycle', 'dog', 'other_vehicle']

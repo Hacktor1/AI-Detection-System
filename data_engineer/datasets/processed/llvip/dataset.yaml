@@ -1,0 +1,10 @@
+# LLVIP Thermal dataset (YOLO format)
+path: .
+train: images/train
+val: images/test
+
+# Number of classes
+nc: 1
+
+# Class names
+names: ['person']

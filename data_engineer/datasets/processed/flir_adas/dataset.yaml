@@ -1,0 +1,10 @@
+# FLIR ADAS Thermal dataset (YOLO format)
+path: .
+train: images/train
+val: images/val
+
+# Number of classes
+nc: 5
+
+# Class names
+names: ['person', 'car', 'bicycle', 'dog', 'other_vehicle']
