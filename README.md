@@ -1,7 +1,7 @@
 # AI-Detection-System pro UAV Termální Snímání
 
-Reálný systém pro detekci lidí a objektů pro drony pomocí dvojice termálních
-a viditelných kamer, nasazený na NVIDIA Jetson Orin Nano.
+Reálný systém pro detekci lidí a objektů pro drony pomocí termální a
+viditelné kamery, nasazený na NVIDIA Jetson Orin Nano.
 
 ## Přehled systému
 
@@ -11,7 +11,7 @@ a viditelných kamer, nasazený na NVIDIA Jetson Orin Nano.
 | **Kamery** | 1× Termální (FLIR Lepton / OAK Thermal), 1× Viditelné světlo (CSI / USB) |
 | **Použití** | Bezpečnostní dohled, detekce lidí, detekce SPZ |
 | **Framework** | YOLOv8/v11 → ONNX → TensorRT |
-| **Výstup** | Bounding boxy s štítky overlayované na kamerové streamy |
+| **Výstup** | Bounding boxy s štítky přidanými do kamerových streamů |
 
 ## Architektura
 
@@ -41,22 +41,22 @@ a viditelných kamer, nasazený na NVIDIA Jetson Orin Nano.
 
 | Role | Adresář | Účel |
 |------|---------|------|
-| Data Engineer | `data_engineer/` | Objevování datasetů, stahování, předzpracování |
-| AI/ML Architekt | `ai_ml_architect/` | Výběr modelu, trénink, ladění hyperparametrů |
-| Pipeline Engineer | `pipeline_engineer/` | Dual-camera video pipeline, detekce, vykreslování |
-| Edge Specialist | `edge_specialist/` | Optimalizace modelu, TensorRT konverze, nasazení na Jetson |
-| Team Lead | `team_lead/` | GitHub správa, dokumentace koordinace |
+| Datový inženýr | `data_engineer/` | Objevování datasetů, stahování, předzpracování |
+| AI/ML architekt | `ai_ml_architect/` | Výběr modelu, trénink, ladění hyperparametrů |
+| Pipeline inženýr | `pipeline_engineer/` | Video pipeline pro dual kamery, detekce, vykreslování |
+| Edge specialista | `edge_specialist/` | Optimalizace modelu, TensorRT konverze, nasazení na Jetson |
+| Team lead | `team_lead/` | GitHub správa, dokumentace koordinace |
 
 ## Dokumentace
 
 | Průvodce | Odkaz | Popis |
 |----------|-------|-------|
-| Začátečnický průvodce | `docs/getting_started.md` | Nastavení prostředí (venv, závislosti) |
-| Hardware nastavení | `docs/hardware_setup.md` | Seznam komponent, nákupní seznam |
-| Připojení kamer | `docs/camera_wiring.md` | Jak připojit kamery k Orin Nano |
-| Instalace JetPacku | `docs/jetpack_install.md` | Jak nainstalovat JetPack SDK na Orin Nano |
-| Nasazení modelu | `docs/model_deployment.md` | Export do ONNX, konverze na TensorRT |
-| Testovací průvodce | `docs/testing.md` | Jak ověřit, že celý pipeline funguje |
+| Začáteční průvodce | `docs/getting_started.md` | Nastavení prostředí (venv, závislosti) |
+|| Hardware nastavení | `docs/hardware_setup.md` | Seznam komponent, nákupní seznam |
+|| Připojení kamer | `docs/camera_wiring.md` | Jak připojit kamery k Orin Nano |
+|| Instalace JetPacku | `docs/jetpack_install.md` | Jak nainstalovat JetPack SDK na Orin Nano |
+|| Nasazení modelu | `docs/model_deployment.md` | Export do ONNX, konverze na TensorRT |
+|| Testovací průvodce | `docs/testing.md` | Jak ověřit, že dvojité kamerové pipeline funguje |
 
 ## Rychlý start
 
@@ -78,7 +78,7 @@ python pipeline_engineer/run_pipeline.py --video data/sample.mp4
 ### Fáze 1: Statické testování na PC
 - [ ] Shromažďování veřejných datasetů pro termální detekci lidí
 - [ ] Trénink / výběr YOLOv8/v11 modelu pro lidi + objekty
-- [ ] Validace přesnosti modelu na ukázkovýchvideích
+- [ ] Validace přesnosti modelu na ukázkových videích
 
 ### Fáze 2: Simulace na Jetson (Testovací prostředí)
 - [ ] Instalace JetPack SDK simulátor nebo Jetson Nano
@@ -103,8 +103,8 @@ python pipeline_engineer/run_pipeline.py --video data/sample.mp4
 - [ ] Integrace s MAVLink pro telemetrii dronu
 
 ## Rychlé odkazy
-- [Průvodce Data Engineerem](data_engineer/README.md)
-- [Průvodce AI/ML Architektem](ai_ml_architect/README.md)
-- [Průvodce Pipeline Inženýrem](pipeline_engineer/README.md)
-- [Průvodce Edge Specialistem](edge_specialist/README.md)
-- [Průvodce Team Leadem](team_lead/README.md)
+- [Průvodce datovým inženýrem](data_engineer/README.md)
+|- [Průvodce AI/ML architektem](ai_ml_architect/README.md)
+|- [Průvodce pipeline inženýrem](pipeline_engineer/README.md)
+|- [Průvodce edge specialistem](edge_specialist/README.md)
+|- [Průvodce team leadem](team_lead/README.md)
