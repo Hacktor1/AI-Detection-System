@@ -231,12 +231,10 @@ def test_onnx_inference():
     sess = ort.InferenceSession(str(onnx_path), providers=["CPUExecutionProvider"])
     input_name = sess.get_inputs()[0].name
 
-    img = cv2.imread(str(PROJECT_ROOT / "ai_ml_architect" / "runs" / "inference_test" / "190001.jpg"))
-    if img is None:
-        pytest.skip("Test image not found")
-
-    img_resized = cv2.resize(img, (640, 640))
-    img_rgb = cv2.cvtColor(img_resized, cv2.COLOR_BGR2RGB)
+    # Create dummy test image (640x640)
+    img = np.zeros((640, 640, 3), dtype=np.uint8)
+    img[100:200, 100:200] = 128
+    img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     img_norm = img_rgb.astype(np.float32) / 255.0
     img_chw = np.transpose(img_norm, (2, 0, 1))[np.newaxis, ...]
 
@@ -244,6 +242,66 @@ def test_onnx_inference():
     assert output.shape[0] == 1  # batch
     assert output.shape[1] == 9   # 4 bbox + 1 obj + 4 classes
     assert output.shape[2] > 0    # anchors
+
+
+# ------------------------------------------------------------------
+# Mobile Stream tests
+# ------------------------------------------------------------------
+def test_mobile_stream_importable():
+    """Verify mobile_stream module can be imported."""
+    import importlib
+    spec = importlib.util.spec_from_file_location(
+        "mobile_stream", PROJECT_ROOT / "edge_specialist" / "mobile_stream.py"
+    )
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    assert hasattr(mod, "app")
+    assert hasattr(mod, "ServerState")
+    assert hasattr(mod, "parse_args")
+
+
+def test_mobile_stream_html_template():
+    """Verify HTML template contains key elements."""
+    import importlib
+    spec = importlib.util.spec_from_file_location(
+        "ms", PROJECT_ROOT / "edge_specialist" / "mobile_stream.py"
+    )
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    assert "Drone AI" in mod.HTML_TEMPLATE
+    assert "/stream.mjpeg" in mod.HTML_TEMPLATE
+    assert "/api/stats" in mod.HTML_TEMPLATE
+    assert "video-feed" in mod.HTML_TEMPLATE
+
+
+def test_mobile_stream_serverstate():
+    """Verify ServerState initializes correctly."""
+    import importlib
+    spec = importlib.util.spec_from_file_location(
+        "ms2", PROJECT_ROOT / "edge_specialist" / "mobile_stream.py"
+    )
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    ss = mod.ServerState()
+    assert ss.running
+    assert ss.fps == 0.0
+    assert ss.boxes == []
+    assert "battery_pct" in ss.telemetry
+    assert "altitude_m" in ss.telemetry
+
+
+def test_mobile_stream_parse_args():
+    """Verify argparse produces correct defaults."""
+    import subprocess, sys as _sys
+    # Run mobile_stream.py --help to verify argparse works
+    result = subprocess.run(
+        [_sys.executable, str(PROJECT_ROOT / "edge_specialist" / "mobile_stream.py"), "--help"],
+        capture_output=True, text=True, timeout=10
+    )
+    assert result.returncode == 0
+    assert "--port" in result.stdout
+    assert "--source" in result.stdout
+    assert "--no-telemetry" in result.stdout
 
 
 if __name__ == "__main__":
@@ -263,6 +321,10 @@ if __name__ == "__main__":
         test_camera_reader,
         test_convert_to_trt_dry_run,
         test_onnx_inference,
+        test_mobile_stream_importable,
+        test_mobile_stream_html_template,
+        test_mobile_stream_serverstate,
+        test_mobile_stream_parse_args,
     ]
 
     passed = 0
