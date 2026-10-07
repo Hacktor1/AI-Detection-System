@@ -1,0 +1,36 @@
+# Konfigurace tréninku YOLO pro UAV termální detekci lidí a aut
+# Podporuje YOLOv8 a YOLOv11 (Ultralytics API)
+
+# Model který použít jako výchozí (stáhne se automaticky při prvním spuštění)
+model: yolov8n.pt        # nano varianta pro hraní nasazení; yolov8s.pt pro vyšší přesnost
+
+# Cesta k datasetu (unifikovaný kombinovaný dataset ze zpracovaných dat)
+data: ../data_engineer/datasets/processed/combined/dataset.yaml
+
+# Hyperparametry tréninku
+epochs: 100              # počet epoch (dostatečné pro termální data s dobrým warmupem)
+imgsz: 640               # velikost obrázků (všechny datasety převedeny na tuto velikost)
+batch: 16                # velikost dávky (16 = vhodné pro 6 GB GPU)
+patience: 20             # early stopping po 20 epochách bez zlepšení
+lr0: 0.01                # počáteční learning rate (YOLO default)
+lrf: 0.1                 # final learning rate = lr0 * lrf (cosine annealing)
+
+# Augmentace (důležité pro termální data — redukuje overfitting na konkrétní podmínky)
+mosaic: 1.0              # Mosaic augmentation (pomáhá s malými objekty)
+mixup: 0.0               # MixUp augmentation (vypnuto — může znevýhodnit termální kontrasty)
+degrees: 0.0             # rotace obrázků ve stupních (vypnuto kvůli orientaci termálních snímků)
+scale: 0.5               # měřitko augmentace
+translate: 0.1           # posunutí
+shear: 0.0               # dopad
+perspective: 0.0         # perspektiva
+flipud: 0.0              # flip nahoru/dolů (vypnuto — termální snímky mají směrný rozměr)
+fliplr: 0.5              # horizontální flip
+hsv_h: 0.0               # změna odstínu (nevolát pro grayscale)
+hsv_s: 0.0               # saturace
+hsv_v: 0.4               # jas (důležité pro termální kontrast)
+
+# Tréninkové nastavení
+device: ""               # GPU ID (prázdné = automatické rozhodnutí; nebo např. "0")
+project: experiments      # adresář pro logy a váhy
+name: uav_thermal_v1     # název experimentu
+optimizer: SGD           # optimalizátor (SGD pro stabilitu, AdamW pro rychlejší konvergence)
