@@ -86,7 +86,7 @@ def main():
     cap.release()
     if out is not None:
         out.release()
-    cv2.destroyAllWindows()
+    cv2.destroyAllWindows() if not args.no_display else None
     print("[pipeline] Finished.")
 
 

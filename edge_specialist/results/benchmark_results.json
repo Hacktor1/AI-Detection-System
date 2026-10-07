@@ -1,0 +1,23 @@
+{
+  "timestamp": "2026-10-07T13:14:48",
+  "video": "../pipeline_engineer/sample_data/test_thermal.mp4",
+  "frames": 13,
+  "imgsz": 640,
+  "sim_jetson": false,
+  "conf_thres": 0.3,
+  "results": [
+    {
+      "backend": "ONNX Runtime",
+      "execution_provider": "CUDAExecutionProvider",
+      "model_path": "optimized_models/best_fp16_dynamic.onnx",
+      "model_size_mb": 6.34,
+      "total_inference_ms": 327.6,
+      "avg_inference_ms": 25.2,
+      "p50_inference_ms": 23.59,
+      "p95_inference_ms": 30.61,
+      "p99_inference_ms": 30.74,
+      "fps": 39.7,
+      "total_detections": 18844
+    }
+  ]
+}
