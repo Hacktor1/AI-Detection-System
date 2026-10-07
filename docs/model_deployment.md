@@ -1,88 +1,87 @@
-# Průvodce nasazením modelu (Jetson Orin Nano)
+# Nasazení modelu na Jetson Orin Nano
 
-## Přehled
-Tento průvodce vede krok za krokem export trénovaného YOLO modelu z PyTorch do TensorRT enginy optimalizovaného pro inferenci na Jetson Orin Nano.
+## Postup
 
-## Požadavky
-- Trénovaný YOLOv8/v9/v11 model (`.pt` soubor)
-- Jetson Orin Nano s nainstalovaným JetPackem
-- ONNX opset nainstalován (`onnx`, `onnx-simplifier`)
+### 1. Export z PyTorch do ONNX
 
-## Krok 1: Export do ONNX
-
-Na tvém vývojovém počítači (nebo Jetsonu):
-```bash
-# Pomocí Ultralytics CLI
-yolo export model=runs/detect/train/weights/best.pt format=onnx opset=13 simplify=true
-
-# Výstup: best.onnx
-```
-
-## Krok 2: Konverze ONNX do TensorRT Enginy
-
-Na Jetson Orin Nano:
-```bash
-# Vytvoř TensorRT engine
-/usr/src/tensorrt/bin/trtexec \
-    --onnx=best.onnx \
-    --saveEngine=best.engine \
-    --fp16 \
-    --workspace=2048 \
-    --minShapes=input0:1x3x640x640 \
-    --optShapes=input0:16x3x640x640 \
-    --maxShapes=input0:32x32x640x640
-
-# Výstup: best.engine
-```
-
-## Krok 3: Načtení a spuštění v Pythonu
-
-Použij `pipeline_engineer/detector.py` s TensorRT backendem:
-```python
-# Příklad použití v pipeline
-from detector import PersonDetector
-
-detector = PersonDetector(model_path="best.engine", conf_thres=0.4)
-boxes = detector.infer(frame)
-```
-
-## Poznámky k výkonu
-- **YOLOv8-nano**: ~30-60 FPS @ 640x640 na Orin Nano (FP16)
-- **YOLOv11**: Lepší přesnost, mírně pomalejší
-- **INT8 kvantizace**: Může zvýšit FPS, ale vyžaduje kalibrační dataset
-
-## Řešení problémů
-- Pokud `trtexec` selže, zkontroluj verzi ONNX opsetu (použij 13 nebo nižší pro kompatibilitu)
-- Pokud vytvoření enginy selže, sniž `--workspace` velikost
-- Pro dynamické tvary, ujisti se, že názvy vstupních tensorů odpovídají ONNX
-
-## Další kroky
-Po nasazení modelu, testuj pomocí [Dvojité kamery pipeline](testing.md).
-
-## Konverze pomocí skriptu
-
-Pro pohodlnější konverzi použijte skript `edge_specialist/convert_to_trt.py`:
+Na vývojovém stroji:
 
 ```bash
 cd edge_specialist
-python convert_to_trt.py \
-    --onnx ../optimized_models/best_fp16_dynamic.onnx \
-    --engine ../optimized_models/best_fp16_dynamic.engine \
-    --fp16 --dry-run    # Nejprve dry-run pro ověření příkazu
+python3 export_to_onnx.py \
+    --weights ../ai_ml_architect/experiments/uav_thermal_v1/weights/best.pt \
+    --output optimized_models/ \
+    --half \
+    --dynamic \
+    --simplify \
+    --opset 14
 ```
 
-Na Jetsonu bez `--dry-run` provede skutečnou konverzi.
+Výsledek: `optimized_models/best_fp16_dynamic.onnx` (~6MB)
 
-## Benchmarking
+### 2. Konverze ONNX → TensorRT Engine
 
-Pro srovnání výkonu PyTorch vs ONNX vs TensorRT:
+**Na Jetsonu Orin Nano** (není možné konvertovat na PC kvůli architektuře):
 
 ```bash
-python benchmark.py \
-    --pt-model ../yolov8n.pt \
-    --onnx-model ../optimized_models/best_fp16_dynamic.onnx \
-    --video ../pipeline_engineer/sample_data/test_thermal.mp4 \
-    --frames 30 --output results/benchmark.json
+# FP16 konverze (doporučeno pro Orin Nano)
+/usr/src/tensorrt/bin/trtexec \
+    --onnx=optimized_models/best_fp16_dynamic.onnx \
+    --saveEngine=optimized_models/best_fp16.engine \
+    --fp16 \
+    --workspace=2048 \
+    --batch=1 \
+    --verbose
+
+# INT8 kalibrace (pokročilá)
+/usr/src/tensorrt/bin/trtexec \
+    --onnx=optimized_models/best_fp16_dynamic.onnx \
+    --saveEngine=optimized_models/best_int8.engine \
+    --fp16 \
+    --int8 \
+    --calib=calib_cache.bin \
+    --workspace=4096
 ```
 
-Viz [edge_specialist/jetpack_setup.md](jetpack_setup.md) pro kompletní poznámky.
+### 3. Inference na Jetsonu
+
+```bash
+# Použijte TensorRT engine v pipeline
+python pipeline_engineer/run_pipeline.py \
+    --video 0 \
+    --model edge_specialist/optimized_models/best_fp16.engine \
+    --conf-thres 0.4 \
+    --no-display
+
+# Nebo použijte ONNX Runtime (pomalejší, ale univerzální)
+python pipeline_engineer/run_pipeline.py \
+    --video 0 \
+    --model edge_specialist/optimized_models/best_fp16_dynamic.onnx \
+    --conf-thres 0.4
+```
+
+## Výkonnostní očekávání (Orin Nano 8GB)
+
+| Backend | FPS (640x640) | Latence | Model size | Poznámka |
+|---------|--------------|---------|------------|----------|
+| PyTorch (.pt) | ~10-20 FPS | ~50-100ms | 6.0 MB | Pouze pro vývoj |
+| ONNX Runtime | ~20-40 FPS | ~25-50ms | 6.3 MB | Univerzální |
+| TensorRT (FP16) | **~30-60 FPS** | ~15-30ms | 6.0 MB | Doporučeno |
+| TensorRT (INT8) | **~60-100 FPS** | ~10-15ms | 3.5 MB | Po kalibraci |
+
+## Detekce formátů modelu
+
+`edge_specialist/convert_to_trt.py` automaticky detekuje formát:
+
+```python
+# .pt  → PyTorch (pouze pro vývoj, pomalé na edge)
+# .onnx → ONNX Runtime (potřebuje onnxruntime nebo CUDA)
+# .engine → TensorRT (optimální pro Jetson)
+```
+
+## Poznámky pro TensorRT
+
+- TensorRT engine je **platform-specific** — vytvořte ho přímo na Orin Nano
+- FP16 je bezpečné pro termální data (nízký kontrast není citlivý na precision loss)
+- INT8 vyžaduje calibrace dataset (použijte 100-500 reprezentativních obrázků)
+- Workspace velikost: 2048 MB pro nano, 4096 MB pro Orin
