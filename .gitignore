@@ -27,6 +27,23 @@ models/*.engine
 models/*.onnx
 models/*.bin
 models/*.weights
+*.pt
+*.engine
+
+# Optimized models
+optimized_models/
+
+# Training experiment outputs
+ai_ml_architect/runs/
+ai_ml_architect/experiments/
+
+# Sample data (videos)
+pipeline_engineer/sample_data/
+pipeline_engineer/results/
+
+# Pipeline benchmark results
+results/
+pipeline_engineer/results/
 
 # Logs
 *.log
