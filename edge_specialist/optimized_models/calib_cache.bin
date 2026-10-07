@@ -1,0 +1,4 @@
+TRT-INT8-Calibration-Cache
+samples=100
+imgsz=640
+input_name=images
