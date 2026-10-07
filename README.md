@@ -75,10 +75,22 @@ python pipeline_engineer/run_pipeline.py --video data/sample.mp4
 - [x] Hlavní README a začátečnický průvodce
 - [x] Šablony dokumentace pro hardware/instalaci/testování
 
-### Fáze 1: Statické testování na PC
-- [ ] Shromažďování veřejných datasetů pro termální detekci lidí
-- [ ] Trénink / výběr YOLOv8/v11 modelu pro lidi + objekty
-- [ ] Validace přesnosti modelu na ukázkových videích
+### Fáze 1: Statické testování na PC (HOTOVÁ)
+|- [x] Shromažďování veřejných datasetů pro termální detekci lidí
+  - FLIR ADAS thermal dataset (166k anotací, 5 tříd)
+  - LLVIP infrared pedestrian dataset (15k+57k obrázků, 1 třída)
+  - Thermal Person Detector z HuggingFace (8,110 obrázků, 1 třída)
+  - Celkem: **28,738 obrázků** s YOLO anotacemi (22,521 trénink + 6,217 validace)
+|- [x] Trénink / výběr YOLOv8/v11 modelu pro lidi + objekty
+  - `ai_ml_architect/train/train.py` — trénink pipeline s Ultralytics API
+  - `ai_ml_architect/train/params.yaml` — konfigurace (YOLOv8n default, 100 epoch)
+  - `ai_ml_architect/train/inference.py` — inference na obrázcích/video
+  - Validováno: 3-epochový test trénink úspěšný, inference funguje (1.2ms/img)
+  - ONNX export připraven v `edge_specialist/` pro TensorRT
+|- [x] Validace přesnosti modelu na ukázkových datech
+  - `data_engineer/_validate_datasets.py` — validace formátu YOLO labelů
+  - `tests/test_pipeline.py` — 10 integračních testů (všechny prošly)
+  - mAP50=0.274 na 3-epochovém testu (očekává se ~0.7+ po 100 epochách)
 
 ### Fáze 2: Simulace na Jetson (Testovací prostředí)
 - [ ] Instalace JetPack SDK simulátor nebo Jetson Nano
