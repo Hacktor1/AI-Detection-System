@@ -1,101 +1,84 @@
-# Testování detekčního systému
+# Testovací průvodce
 
-## Přehled
-Průvodce testováním dvojité kamerové detekční pipeline na vývojových počítačích
-i na Jetson Orin Nano.
+## Přehled testů
 
-## Předtestovací kontrola
-- [ ] Kamery připojeny a detegovány (`/dev/video*`)
-- [ ] JetPack SDK nainstalován na Jetsonu
-- [ ] Model exportován jako TensorRT `.engine`
-- [ ] `requirements.txt` nainstalován v virtuálním prostředí
+Projekt obsahuje **33 integračních testů** rozdělených do 3 souborů.
 
-## Test 1: Detekce kamer
-Ověř, že jsou obě kamery detegovány:
+### Spuštění všech testů
+
 ```bash
-# Seznam všech video zařízení
-ls -la /dev/video*
+# Bez pytest (použije vestavěný test runner)
+python3 tests/test_pipeline.py     # Phase 1-2: 10 testů
+python3 tests/test_phase3.py       # Phase 3: 11 testů
+python3 tests/test_phase45.py      # Phase 4-5: 12 testů
 
-# Ověř každý stream kamery
-python pipeline_engineer/camera_io.py --source 0  # Kamera 1
-python pipeline_engineer/camera_io.py --source 1  # Kamera 2
+# S pytest (instalace: pip install pytest)
+python3 -m pytest tests/ -v        # Všechny 33 testy
 ```
 
-## Test 2: Inferenční model
-Spusť inferenci na ukázkovém obrázku pro potvrzení načtení modelu:
+### Co testy ověřují
+
+| Test soubor | Fáze | Obsah |
+|---|---|---|
+| `test_pipeline.py` | 1-2 | Dataset YAML, label formát, importy, validace |
+| `test_phase3.py` | 3 | TRT command, JetsonProfile, env check, ONNX model |
+| `test_phase45.py` | 4-5 | Profiler, INT8 kalib, web UI, MAVLink, dual cam |
+
+## Testovací dataset
+
+Pro rychlé testy je připravený malý test dataset:
+
 ```bash
-python pipeline_engineer/detector.py --image data/test/sample.jpg --model models/best.engine
+# Struktura test datasetu
+data_engineer/datasets/processed/combined_test/
+├── images/train/   # 100 obrázků (ze všech 3 datasetů)
+├── images/val/     # 60 obrázků
+├── labels/train/   # YOLO .txt anotace
+├── labels/val/
+└── dataset.yaml
 ```
 
-Očekávaný výstup:
-```
-[detector] TensorRT engine loaded: models/best.engine
-[detector] Inference done: 2 people detected (conf: 0.85, 0.76)
-```
+## Pipeline test
 
-## Test 3: Kompletní dvojitá kamera pipeline
-Spusť kompletní pipeline se skvrnami:
 ```bash
-python pipeline_engineer/dual_camera_pipeline.py \
-    --thermal-source sample_data/test_thermal.mp4 \
-    --visible-source sample_data/test_visible.mp4 \
+# Headless test (bez GUI)
+cd pipeline_engineer
+python3 run_pipeline.py \
+    --video sample_data/test_thermal.mp4 \
     --model ../optimized_models/best_fp16_dynamic.onnx \
-    --output-dir results/
-```
+    --no-display \
+    --conf-thres 0.1
 
-Tímto se provede:
-1. Získání snímků z obou kamer najednou (paralelní vlákna)
-2. Spuštění detekce na každém snímku (ONNX Runtime nebo TensorRT engine)
-3. Overlay bounding boxů na oba streamy
-4. Vedle sebe (side-by-side) oraz svýzku a FPS/latence do `results/`
-
-### Fáze 2: Simulace Jetson (bez hardware)
-```bash
-# 1. Vygenerujte syntetické viditelné video (pokud ještě neexistuje):
-python -m jetson_sim.make_sample_video \
-    --thermal-input pipeline_engineer/sample_data/test_thermal.mp4 \
-    --visible-output pipeline_engineer/sample_data/test_visible.mp4 --frames 30
-
-# 2. Spusťte simulaci s omezením CPU threadů:
-python pipeline_engineer/dual_camera_pipeline.py \
+# Dual camera test
+python3 dual_camera_pipeline.py \
     --thermal-source sample_data/test_thermal.mp4 \
     --visible-source sample_data/test_visible.mp4 \
-    --model ../yolov8n.pt \
-    --sim-jetson --no-display --max-frames 30
-
-# 3. Benchmark porovnání backends:
-python edge_specialist/benchmark.py \
-    --pt-model ../yolov8n.pt \
-    --onnx-model ../optimized_models/best_fp16_dynamic.onnx \
-    --video ../pipeline_engineer/sample_data/test_thermal.mp4 \
-    --frames 30 --sim-jetson --output results/benchmark.json
-```
-
-Viz [Průvodce simulací Jetson](jetson_simulation.md) pro detailní dokumentaci.
-
-## Test 4: Hluchý režim (Jetson)
-Na Jetsonu bez displeje:
-```bash
-# Bez GUI displeje
-python pipeline_engineer/dual_camera_pipeline.py \
-    --thermal-source /dev/video0 \
-    --visible-source /dev/video1 \
-    --model models/best.engine \
+    --model ../edge_specialist/optimized_models/best_fp16_dynamic.onnx \
     --no-display \
-    --output-dir /tmp/results/
+    --max-frames 10
 ```
 
-## Výkonnostní metriky
-Monitoruj FPS a využití zdrojů:
+## Benchmark test
+
 ```bash
-# GPU využití
-tegrastats
-
-# Pipeline log ukáže:
-# [pipeline] Frame 100 | inference: 0.032s | boxes: 3
+cd edge_specialist
+python3 benchmark.py \
+    --onnx optimized_models/best_fp16_dynamic.onnx \
+    --video ../pipeline_engineer/sample_data/test_thermal.mp4 \
+    --frames 30
 ```
 
-## Tip na ladění
-- Pokud jedna kamera selže, zkontroluj `dmesg | grep -i camera` pro hardware chyby
-- Pokud je inferenční model pomalý, zkus snížit rozlišení vstupu (např. 480x360)
-- Zkontroluj termický throttling: `cat /sys/class/thermal/thermal_zone*/temp`
+## Validation test
+
+```bash
+cd data_engineer
+python3 _validate_datasets.py
+```
+
+## Očekávané výsledky
+
+- **10/10 Phase 1-2 testy** prošly
+- **11/11 Phase 3 testy** prošly
+- **12/12 Phase 4-5 testy** prošely
+- **Data validation**: 0 errors across 28,738 images
+- **Inference speed**: 39.7 FPS (ONNX CPU), 0.004s/img (PyTorch CPU)

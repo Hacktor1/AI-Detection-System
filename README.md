@@ -55,9 +55,10 @@ viditelné kamery, nasazený na NVIDIA Jetson Orin Nano.
 | Začáteční průvodce | `docs/getting_started.md` | Nastavení prostředí (venv, závislosti) |
 || Hardware nastavení | `docs/hardware_setup.md` | Seznam komponent, nákupní seznam |
 || Připojení kamer | `docs/camera_wiring.md` | Jak připojit kamery k Orin Nano |
-|| Instalace JetPacku | `docs/jetpack_install.md` | Jak nainstalovat JetPack SDK na Orin Nano |
-|| Nasazení modelu | `docs/model_deployment.md` | Export do ONNX, konverze na TensorRT |
-|| Testovací průvodce | `docs/testing.md` | Jak ověřit, že dvojité kamerové pipeline funguje |
+||| Připojení kamer | `docs/camera_wiring.md` | Jak připojit kamery k Orin Nano |
+||| Instalace JetPacku | `docs/jetpack_setup.md` | Jak nainstalovat JetPack SDK na Orin Nano |
+||| Nasazení modelu | `docs/model_deployment.md` | Export do ONNX, konverze na TensorRT |
+||| Testování | `docs/testing.md` | Jak spustit testy a validaci |
 
 ## Rychlý start
 

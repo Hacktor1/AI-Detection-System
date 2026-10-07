@@ -1,71 +1,75 @@
-# Průvodce připojením kamer
+# Připojení kamer k Jetson Orin Nano
 
 ## Přehled
-Tento průvodce vysvětluje, jak připojit dvě kamery (termální + viditelné světlo) k Jetson Orin Nano.
 
-## Porty kamer na Jetson Orin Nano
+Tento dokument popisuje, jak připojit termální a viditelné kamery k Jetson Orin Nano.
 
-| Typ portu | Množství | Popis |
-|-----------|----------|-------------|
-| CSI-2 (MIPI) | 1× | Vyhrazené rozhraní kamery (vysoká propustnost) |
-| USB 3.0 | 2× | Standardní USB port (podporuje webkamery) |
-| USB 2.0 | 1× | Nižší rychlost USB |
+## Pinout a konektory
 
-## Nastavení připojení
+### CSI (MIPI) konektor
+- **Použití**: Viditelná kamera (Raspberry Pi Camera v2, OAK-D)
+- **Připojení**: 22-pin CSI konektor (nahoře na dev kitu)
+- **Podpora**: 1× kamera (alespoň pro začátek)
 
-### Možnost A: CSI + USB (Doporučeno)
-- **Viditelná kamera** → CSI port (pro nejvyšší výkon)
-- **Termální kamera** → USB 3.0 port
+### USB 3.0 porty
+- **Použití**: Termální kamera (FLIR Lepton přes USB, OAK Thermal)
+- **Poznámka**: USB 3.0 je důležitý pro vysoký datový tok termálních videí
 
+### SPI rozhraní
+- **Použití**: FLIR Lepton přes SPI breakout board
+- **Požadavky**: Manuální wiring, SPI musí být povoleno v Jetson IO
+
+## Zapojení
+
+### Viditelná kamera (CSI)
 ```
-         Jetson Orin Nano
-    +-------------------------+
-    |   [CSI-2]     [USB-C]   |
-    |     |              |    |
-    |   [CAM0]       [USB-A] |
-    |     |              |    |
-    |  Viditelná    Termální  |
-    +-------------------------+
+Jetson Orin Nano          Raspberry Pi Camera v2
+CSI port (22-pin)   ↔    CSI konektor (22-pin)
 ```
 
-### Možnost B: Dvojité USB
-Pokud používáš dvě USB kamery:
-- Obě kamery → USB 3.0 porty
-- Může být potřeba napájený USB hub, pokud příkon přesahuje limity USB
+### Termální kamera (USB)
+```
+Jetson Orin Nano          FLIR Lepton (přes USB adapter)
+USB 3.0 port        ↔    USB-C/Micro USB
+```
 
-## Podporované kamery
+### Termální kamera (SPI)
+```
+Jetson Orin Nano          FLIR Lepton Breakout
+Pin 19 (SPI0_MOSI)  ↔    MOSI
+Pin 21 (SPI0_MISO)  ↔    MISO
+Pin 23 (SPI0_SCLK)  ↔    SCK
+Pin 24 (SPI0_CS0)   ↔    CS
+Pin 6  (GND)        ↔    GND
+Pin 1  (3V3)        ↔    VCC
+```
 
-### CSI kamery
-- Raspberry Pi Camera Module v2 (Sony IMX219)
-- ArduCam IMX219/MIPI
-- Leopard Imaging LI-OV5640
+## Ověření kamer
 
-### USB kamery
-- FLIR Blackfly (USB3)
-- OAK-D série
-- Logitech C920/C922
-- Generické UVC webkamery
+Po zapojení:
 
-### Termální kamery
-- FLIR Lepton (přes breakout board + SPI-to-USB adapter)
-- OAK Thermal (USB3)
-- Seek Thermal (USB OTG, omezená podpora)
-
-## Prvotní test
-
-Po připojení kamer ověř detekci:
 ```bash
-# Seznam všech video zařízení
-ls /dev/video*
-
-# Seznam USB zařízení
+# Ověření USB kamer
 lsusb
 
-# Kontrola informací o kameře
-v4l2-ctl --list-devices
+# Ověření CSI kamer
+sudo tegrastats --interval 1000
+
+# Test video vstupu
+python3 -c "
+import cv2
+cap = cv2.VideoCapture(0)  # /dev/video0
+ret, frame = cap.read()
+print(f'Frame shape: {frame.shape}' if ret else 'Failed')
+cap.release()
+"
+
+# Ověření všech video zařízení
+ls -la /dev/video*
 ```
 
-Pokud se kamery objeví v `/dev/video*`, systém je deteguje.
+## Poznámky
 
-## Další kroky
-Viz [Průvodce instalací JetPacku](jetpack_install.md) pro nastavení OS a ovladačů.
+- Termální kamera by měla být primární pro detekci lidí
+- Viditelná kamera doplňuje pro detekci detailů (SPZ, text)
+- Všechny kamery by měly mít synchronizovaný čas (pro dual-stream analýzu)
