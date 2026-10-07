@@ -93,17 +93,17 @@ python pipeline_engineer/run_pipeline.py --video data/sample.mp4
   - `tests/test_pipeline.py` — 10 integračních testů (všechny prošly)
   - mAP50=0.274 na 3-epochovém testu (očekává se ~0.7+ po 100 epochách)
 
-### Fáze 2: Simulace na Jetson (HOTOVÁ)
-- [x] Simulační prostředí Jetson Orin Nano (`jetson_sim/`) — CPU thread limiting, thermal throttling, memory limits
+### Fáze 2: Simulace na Jetson (Rozpracovaná)
+|- [x] ONNX export pipeline (`edge_specialist/export_to_onnx.py`) — FP16 dynamic opset 14
 - [x] Simulace dual camera vstupu — syntetické viditelné video z termálního (`jetson_sim/make_sample_video.py`)
 - [x] Dual camera pipeline s paralelním čtením obou streamů (`pipeline_engineer/dual_camera_pipeline.py`)
-- [x] Spuštění pipeline a benchmark FPS / latence — výsledky viz `results/benchmark_phase2.json`:
-  - ONNX Runtime (4 threads, sim Jetson): **47.3 FPS**, 21.1ms avg latency
-  - ONNX Runtime (CUDA): **337 FPS**, 3.0ms avg latency
-  - PyTorch (CUDA): **241 FPS**, 4.2ms avg latency
-- [x] TensorRT engine konverze skript (`edge_specialist/convert_to_trt.py`) — dry-run ověřen
+|- [x] Spuštění pipeline a benchmark FPS / latence — výsledky viz `edge_specialist/results/benchmark_results.json`:
+  - ONNX Runtime (CPU): **39.7 FPS**, 25.2ms avg latency (model: 6.3MB FP16)
+  - ONNX Runtime (CUDA): selhání kvůli chybějícím CUDA knihovnám, CPU fall-back aktivní
+  - PyTorch inference: 0.004s/img na CPU (3-epoch model)
+|- [x] TensorRT engine konverze skript (`edge_specialist/convert_to_trt.py`) — připraven
 - [x] Benchmark skript pro srovnání backends (`edge_specialist/benchmark.py`)
-- [x] 14 integračních testů pro simulaci a pipeline (všechny prošly)
+- [ ] 14 integračních testů pro simulaci a pipeline (všechny prošly)
 
 ### Fáze 3: Skutečná integrace hardwaru (CÍL)
 |- [ ] Instalace JetPack 6 na Orin Nano
