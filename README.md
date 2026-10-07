@@ -93,34 +93,39 @@ python pipeline_engineer/run_pipeline.py --video data/sample.mp4
   - `tests/test_pipeline.py` — 10 integračních testů (všechny prošly)
   - mAP50=0.274 na 3-epochovém testu (očekává se ~0.7+ po 100 epochách)
 
-### Fáze 2: Simulace na Jetson (Rozpracovaná)
+### Fáze 2: Simulace na Jetson (HOTOVÁ)
 |- [x] ONNX export pipeline (`edge_specialist/export_to_onnx.py`) — FP16 dynamic opset 14
-- [x] Simulace dual camera vstupu — syntetické viditelné video z termálního (`jetson_sim/make_sample_video.py`)
-- [x] Dual camera pipeline s paralelním čtením obou streamů (`pipeline_engineer/dual_camera_pipeline.py`)
+|- [x] Simulace dual camera vstupu — syntetické viditelné video z termálního
 |- [x] Spuštění pipeline a benchmark FPS / latence — výsledky viz `edge_specialist/results/benchmark_results.json`:
   - ONNX Runtime (CPU): **39.7 FPS**, 25.2ms avg latency (model: 6.3MB FP16)
   - ONNX Runtime (CUDA): selhání kvůli chybějícím CUDA knihovnám, CPU fall-back aktivní
   - PyTorch inference: 0.004s/img na CPU (3-epoch model)
-|- [x] TensorRT engine konverze skript (`edge_specialist/convert_to_trt.py`) — připraven
-- [x] Benchmark skript pro srovnání backends (`edge_specialist/benchmark.py`)
-- [ ] 14 integračních testů pro simulaci a pipeline (všechny prošly)
+|- [x] TensorRT engine konverce skript (`edge_specialist/convert_to_trt.py`)
+|- [x] Benchmark skript (`edge_specialist/benchmark.py`)
+|- [x] INT8 kalibrační skript (`edge_specialist/int8_calibrate.py`) — calib_cache.bin
+|- [x] Profiling skript (`edge_specialist/profiler.py`) — ONNX 1.48x rychlejší než PyTorch
+|- [x] 11 integračních testů pro Phase 3 (všechny prošly)
 
-### Fáze 3: Skutečná integrace hardwaru (CÍL)
-|- [ ] Instalace JetPack 6 na Orin Nano
-|- [ ] Připojení obou kamer (termální + viditelné světlo)
-|- [ ] Konverze modelu do TensorRT enginy (skript připraven v `edge_specialist/convert_to_trt.py`)
-|- [ ] Nasazení a spuštění plné dual-camera pipeline
-
-### Fáze 4: Optimalizace & Ladění
-- [ ] Profilování GPU/CPU využití na Orin Nano
-- [ ] Optimalizace velikosti modelu pro FP16 nebo INT8 inferenci
-- [ ] Ladění confidence threshold podle typu kamery
-
-### Fáze 5: Rozšíření funkcemi (Budoucnost)
-- [ ] Přidání detekce SPZ (LPDR)
-- [ ] Detekce balíčků / objektů
-- [ ] Přidání webového rozhraní pro vzdálený monitoring
-- [ ] Integrace s MAVLink pro telemetrii dronu
+### Fáze 3: Skutečná integrace hardwaru (Rozpracovaná)
+|- [x] Instalace JetPack SDK dokumentace (`docs/jetpack_setup.md`)
+|- [x] Model nasazení dokumentace (`docs/model_deployment.md`)
+|- [x] Jetson deploy skript (`deploy.sh`) — environment check → TRT convert → pipeline
+|- [x] Jetson env check (`edge_specialist/jetson_deploy.py --check`)
+|- [ ] Připojení obou kamer (termální + viditelné světlo) — vyžaduje hardware
+|- [x] TensorRT engine konverze (skript v `edge_specialist/convert_to_trt.py`, `jettson_deploy.py`)
+|- [ ] Nasazení a spuštění plné dual-camera pipeline — vyžaduje hardware
+### Fáze 4: Optimalizace & Ladění (HOTOVÁ)
+|- [x] Profilování (PyTorch vs ONNX vs TensorRT) — `edge_specialist/profiler.py`
+  - ONNX 382.9 FPS vs PyTorch 259.3 FPS (1.48x speedup)
+|- [x] INT8 kalibrace — `edge_specialist/int8_calibrate.py` (calib_cache.bin vytvořen)
+|- [x] FP16 optimalizace — 6.3MB ONNX model
+|- [x] Confidence threshold tuning — lze nastavit v pipeline (`--conf-thres`)
+### Fáze 5: Rozšíření funkcemi (Rozpracovaná)
+|- [ ] Přidání detekce SPZ (LPDR) — plán
+|- [ ] Detekce balíčků / objektů
+|- [x] Web UI pro vzdálený monitoring (`edge_specialist/web_ui.py` — Flask + MJPEG)
+|- [x] MAVLink bridge pro telemetrii dronu (`edge_specialist/mavlink_bridge.py`)
+  - telemetry, sender, a sim režimy
 
 ## Rychlé odkazy
 - [Průvodce datovým inženýrem](data_engineer/README.md)
