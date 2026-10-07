@@ -73,7 +73,7 @@ class DroneState:
         self.altitude_m = min(100.0, self.altitude_m + 0.1 * dt)
         self.heading_deg = (self.heading_deg + 0.5 * dt) % 360
         self.airspeed_ms = 5.0 + 2.0 * math.sin(time.time() * 0.1)
-        self.battery_pct = max(0, self.battery_pct - 0.05 * dt)
+        self.battery_pct = max(0, self.battery_pct - 0.5 * dt)  # 0.5%/sec simulated drain
 
         # Simple circular path
         radius = 0.001
