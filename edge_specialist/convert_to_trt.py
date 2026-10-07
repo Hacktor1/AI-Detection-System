@@ -157,25 +157,51 @@ def main():
         print(f"ERROR: ONNX model not found: {onnx_path}")
         sys.exit(1)
 
-    # Validate ONNX with onnxruntime
+    # Validate ONNX model — try strict check first, then fall back to
+    # a lenient check that infers shapes (Ultralytics-exported dynamic
+    # models sometimes trigger topological-sort warnings that TensorRT's
+    # own parser tolerates).
+    size_mb = onnx_path.stat().st_size / (1024 * 1024)
+    onnx_input_names = []
+    onnx_output_names = []
+
     try:
         import onnx
         model = onnx.load(str(onnx_path))
-        onnx.checker.check_model(model)
-        print(f"[convert_to_trt] ONNX model validated: {onnx_path}")
-        print(f"  Inputs:  {[(i.name, [d.dim_value for d in i.type.tensor_type.shape.dim]) for i in model.graph.input]}")
-        print(f"  Outputs: {[(o.name, [d.dim_value for d in o.type.tensor_type.shape.dim]) for o in model.graph.output]}")
+        try:
+            onnx.checker.check_model(model)
+            print(f"[convert_to_trt] ONNX model validated: {onnx_path}")
+        except Exception as check_err:
+            # The strict checker can flag topological ordering that
+            # TensorRT's parser handles fine.  Infer shapes and retry
+            # the lighter validation before giving up.
+            print(f"[convert_to_trt] Strict check flagged: {check_err}")
+            print("[convert_to_trt] Attempting shape inference / topological fix…")
+            try:
+                model = onnx.shape_inference.infer_shapes(model)
+                onnx.checker.check_model(model)
+                print(f"[convert_to_trt] ONNX model validated (after shape inference): {onnx_path}")
+            except Exception:
+                # Still not strictly valid — warn but do NOT abort.
+                # trtexec / the TensorRT parser is more lenient and will
+                # report the real error if the model is truly broken.
+                print(f"[convert_to_trt] WARNING: ONNX strict validation failed.")
+                print(f"[convert_to_trt]   {check_err}")
+                print("[convert_to_trt] Proceeding — TensorRT parser will validate during build.")
 
-        # Report model size
-        size_mb = onnx_path.stat().st_size / (1024 * 1024)
+        onnx_input_names = [(i.name, [d.dim_value if d.HasField("dim_value") else d.dim_param
+                                       for d in i.type.tensor_type.shape.dim])
+                            for i in model.graph.input]
+        onnx_output_names = [(o.name, [d.dim_value if d.HasField("dim_value") else d.dim_param
+                                         for d in o.type.tensor_type.shape.dim])
+                             for o in model.graph.output]
+        print(f"  Inputs:  {onnx_input_names}")
+        print(f"  Outputs: {onnx_output_names}")
         print(f"  Size: {size_mb:.1f} MB")
     except ImportError:
         print("[convert_to_trt] onnx package not available — skipping validation")
-        size_mb = onnx_path.stat().st_size / (1024 * 1024)
     except Exception as e:
-        print(f"[convert_to_trt] ERROR: ONNX validation failed: {e}")
-        if not args.dry_run:
-            sys.exit(1)
+        print(f"[convert_to_trt] WARNING: Could not inspect ONNX model: {e}")
 
     # Build conversion command
     precision = "FP16" if args.fp16 else ("INT8" if args.int8 else "FP32")
