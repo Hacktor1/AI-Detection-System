@@ -1,0 +1,15 @@
+{
+  "total_frames": 10,
+  "total_time_s": 1.997,
+  "avg_fps": 5.01,
+  "avg_inference_ms": 186.1,
+  "avg_capture_ms": 0.01,
+  "avg_render_ms": 2.67,
+  "p95_latency_ms": 985.0,
+  "p50_inference_ms": 8.53,
+  "p99_inference_ms": 1623.31,
+  "model": "../edge_specialist/optimized_models/best_fp16_dynamic.onnx",
+  "thermal_source": "sample_data/test_thermal.mp4",
+  "visible_source": "sample_data/test_visible.mp4",
+  "sim_jetson": false
+}
