@@ -58,3 +58,31 @@ boxes = detector.infer(frame)
 
 ## Další kroky
 Po nasazení modelu, testuj pomocí [Dvojité kamery pipeline](testing.md).
+
+## Konverze pomocí skriptu
+
+Pro pohodlnější konverzi použijte skript `edge_specialist/convert_to_trt.py`:
+
+```bash
+cd edge_specialist
+python convert_to_trt.py \
+    --onnx ../optimized_models/best_fp16_dynamic.onnx \
+    --engine ../optimized_models/best_fp16_dynamic.engine \
+    --fp16 --dry-run    # Nejprve dry-run pro ověření příkazu
+```
+
+Na Jetsonu bez `--dry-run` provede skutečnou konverzi.
+
+## Benchmarking
+
+Pro srovnání výkonu PyTorch vs ONNX vs TensorRT:
+
+```bash
+python benchmark.py \
+    --pt-model ../yolov8n.pt \
+    --onnx-model ../optimized_models/best_fp16_dynamic.onnx \
+    --video ../pipeline_engineer/sample_data/test_thermal.mp4 \
+    --frames 30 --output results/benchmark.json
+```
+
+Viz [edge_specialist/jetpack_setup.md](jetpack_setup.md) pro kompletní poznámky.

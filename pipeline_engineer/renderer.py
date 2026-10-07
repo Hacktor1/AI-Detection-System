@@ -6,7 +6,10 @@ Draws bounding boxes and labels on frames for visualization.
 """
 import cv2
 
-from detector import Detection
+try:
+    from .detector import Detection
+except ImportError:
+    from detector import Detection
 
 
 # Thermal-friendly colors (BGR)

@@ -137,7 +137,7 @@ nc: {len(CLASS_MAP)}
 # Class names
 names: {list(CLASS_MAP.keys())}
 """
-    yaml_path = PROCESSED_DIR.parent / "llvip.yaml"
+    yaml_path = PROCESSED_DIR / "dataset.yaml"
     with open(yaml_path, "w") as f:
         f.write(yaml_content)
     print(f"\n[INFO] dataset.yaml written to {yaml_path}")

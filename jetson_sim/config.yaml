@@ -1,0 +1,59 @@
+# Jetson Orin Nano Hardware Profile (Simulation)
+# Used by jetson_sim to constrain CPU threads, memory, and simulate
+# thermal throttling during pipeline benchmarking.
+#
+# Reference: NVIDIA Jetson Orin Nano Developer Kit (8GB / 16GB)
+# https://www.nvidia.com/en-us/autonomous-machines/embedded/jetson-orin/
+
+platform:
+  name: "Jetson Orin Nano (simulated)"
+  soc: "Orin Nano (T234)"
+  architecture: "ARM Cortex-A78AE (6-core) + NVIDIA Ampere GPU (1024 CUDA, 32 Tensor)"
+
+cpu:
+  cores: 6               # Physical CPU cores
+  threads: 6             # Logical threads (no hyperthreading on A78AE)
+  max_freq_mhz: 2000     # Max boost clock
+  # When sim_mode is active, ONNX Runtime / PyTorch are limited to
+  # this many CPU threads to simulate the Jetson's compute constraints.
+  sim_cpu_threads: 4     # Reduced thread count for realistic inference simulation
+
+gpu:
+  cuda_cores: 1024
+  tensor_cores: 32
+  memory_mb: 8192         # 8 GB LPDDR5 (also available: 16 GB variant)
+  memory_bandwidth_gb_s: 51.2
+  max_freq_mhz: 1300      # GPU boost clock (MHz)
+  tdp_w: 15               # Max TDP (Watts)
+
+power:
+  max_power_w: 15
+  # Power modes: 7W (efficiency), 10W (balanced), 15W (max)
+  modes:
+    - { label: "MAXN", watts: 15 }
+    - { label: "MAXQ", watts: 10 }
+    - { label: "BEST_EFFICIENCY", watts: 7 }
+
+thermal:
+  # Jetson throttles when die temperature exceeds this threshold
+  throttle_temp_c: 80
+  # In simulation, sustained inference degrades performance after
+  # `sustained_seconds` of continuous load.
+  sustained_seconds: 30
+  # Maximum performance degradation (50% slower) under thermal throttling
+  max_throttle_factor: 1.5
+
+# Simulation parameters
+simulation:
+  # If true, limit ONNX Runtime threads to simulate Jetson CPU constraints
+  limit_threads: true
+  # Simulate thermal throttling during sustained inference
+  enable_throttle: true
+  # Simulated memory limit in MB (prevents allocating beyond Jetson RAM)
+  memory_limit_mb: 6144   # Reserve 2GB for OS
+  # Input resolution for inference (Jetson inference at this resolution)
+  inference_width: 640
+  inference_height: 640
+  # Expected performance targets (for validation)
+  target_fps: 25          # YOLOv8-nano @ 640x640 FP16 on Orin Nano
+  target_latency_ms: 35    # End-to-end latency target

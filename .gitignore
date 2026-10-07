@@ -57,8 +57,9 @@ Thumbs.db
 .vscode/
 .idea/
 
-# Scripts (local utility)
+# Scripts (local utility scripts starting with _ — but not __init__.py)
 _*
+!__init__.py
 
 # Jupyter
 .ipynb_checkpoints/

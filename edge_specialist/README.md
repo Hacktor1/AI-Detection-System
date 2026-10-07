@@ -23,10 +23,11 @@ Optimalizovat trénovaný YOLO model a nasadit ho na NVIDIA Jetson Orin Nano. P�
 ## Struktura adresářů
 ```
 edge_specialist/
-├── convert_to_trt.py       # Konverze ONNX → TensorRT
-├── benchmark.py           # Měření FPS/latency
-├── jetpack_setup.md       # Poznámky nastavení Jetson
-└── optimized_models/      # Finální .engine soubory (gitignored)
+├── export_to_onnx.py       # Export PyTorch .pt → ONNX
+├── convert_to_trt.py       # Konverze ONNX → TensorRT engine
+├── benchmark.py            # Měření FPS/latency (PyTorch vs ONNX vs TRT)
+├── jetpack_setup.md        # Poznámky nastavení Jetson a TensorRT
+└── optimized_models/       # Finální .engine soubory (gitignored)
 ```
 
 ## Příkaz pro konverzi (příklad)

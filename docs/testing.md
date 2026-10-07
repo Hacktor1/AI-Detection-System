@@ -37,17 +37,41 @@ Očekávaný výstup:
 Spusť kompletní pipeline se skvrnami:
 ```bash
 python pipeline_engineer/dual_camera_pipeline.py \
-    --thermal-source /dev/video0 \
-    --visible-source /dev/video1 \
-    --model models/best.engine \
+    --thermal-source sample_data/test_thermal.mp4 \
+    --visible-source sample_data/test_visible.mp4 \
+    --model ../optimized_models/best_fp16_dynamic.onnx \
     --output-dir results/
 ```
 
 Tímto se provede:
-1. Získání snímků z obou kamer najednou
-2. Spuštění detekce na každém snímku
-3. Overlay bounding boxů
-4. Uložení anotovaných snímků + detekčních logů do `results/`
+1. Získání snímků z obou kamer najednou (paralelní vlákna)
+2. Spuštění detekce na každém snímku (ONNX Runtime nebo TensorRT engine)
+3. Overlay bounding boxů na oba streamy
+4. Vedle sebe (side-by-side) oraz svýzku a FPS/latence do `results/`
+
+### Fáze 2: Simulace Jetson (bez hardware)
+```bash
+# 1. Vygenerujte syntetické viditelné video (pokud ještě neexistuje):
+python -m jetson_sim.make_sample_video \
+    --thermal-input pipeline_engineer/sample_data/test_thermal.mp4 \
+    --visible-output pipeline_engineer/sample_data/test_visible.mp4 --frames 30
+
+# 2. Spusťte simulaci s omezením CPU threadů:
+python pipeline_engineer/dual_camera_pipeline.py \
+    --thermal-source sample_data/test_thermal.mp4 \
+    --visible-source sample_data/test_visible.mp4 \
+    --model ../yolov8n.pt \
+    --sim-jetson --no-display --max-frames 30
+
+# 3. Benchmark porovnání backends:
+python edge_specialist/benchmark.py \
+    --pt-model ../yolov8n.pt \
+    --onnx-model ../optimized_models/best_fp16_dynamic.onnx \
+    --video ../pipeline_engineer/sample_data/test_thermal.mp4 \
+    --frames 30 --sim-jetson --output results/benchmark.json
+```
+
+Viz [Průvodce simulací Jetson](jetson_simulation.md) pro detailní dokumentaci.
 
 ## Test 4: Hluchý režim (Jetson)
 Na Jetsonu bez displeje:

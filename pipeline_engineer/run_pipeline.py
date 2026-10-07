@@ -29,6 +29,8 @@ def parse_args():
                         help="Optional output video file path")
     parser.add_argument("--conf-thres", type=float, default=0.4,
                         help="Confidence threshold for detections")
+    parser.add_argument("--no-display", action="store_true",
+                        help="Skip cv2.imshow() (headless mode for CI/servers)")
     return parser.parse_args()
 
 
@@ -67,10 +69,11 @@ def main():
         # --- Render ---
         vis = draw_detections(frame, boxes)
 
-        # Show in window
-        cv2.imshow("Drone AI — Thermal Detection", vis)
-        if cv2.waitKey(1) & 0xFF == ord("q"):
-            break
+        # Show in window (unless headless)
+        if not args.no_display:
+            cv2.imshow("Drone AI — Thermal Detection", vis)
+            if cv2.waitKey(1) & 0xFF == ord("q"):
+                break
 
         if out is not None:
             out.write(vis)
