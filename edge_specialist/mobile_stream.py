@@ -238,16 +238,16 @@ def _update_telemetry(dt: float):
 # Web routes
 # ------------------------------------------------------------------
 HTML_TEMPLATE = """<!DOCTYPE html>
-<html lang="cs">
+<html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <title>Drone AI — Detekční systém</title>
+    <title>Drone AI — Thermal Detection</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            background: #0f0f23;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+            background: #0a0a1a;
             color: #e0e0e0;
             overflow-x: hidden;
         }
@@ -261,20 +261,20 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         }
         .status-dot { height: 10px; width: 10px; border-radius: 50%; background: #00ff88; display: inline-block; margin-right: 5px; }
         .header {
-            background: #16213e;
+            background: linear-gradient(135deg, #1a1a2e 0%, #0f0f23 100%);
             padding: 0.75rem 1.5rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            border-bottom: 2px solid #00d4ff;
         }
-        .header h1 { color: #00d4ff; font-size: 1.3rem; }
-        .header .subtitle { color: #888; font-size: 0.8rem; }
+        .header h1 { color: #00d4ff; font-size: 1.3rem; font-weight: 600; }
+        .header .subtitle { color: #888; font-size: 0.8rem; margin-top: 0.2rem; }
         .video-container {
             position: relative;
             width: 100%;
             max-width: 800px;
             margin: 0 auto;
             background: #000;
+            border-radius: 8px;
+            overflow: hidden;
         }
         #video-feed {
             width: 100%;
@@ -285,10 +285,11 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             position: absolute;
             top: 10px;
             right: 10px;
-            background: rgba(26, 31, 48, 0.8);
+            background: rgba(26, 31, 48, 0.9);
             border-radius: 8px;
             padding: 0.5rem 0.75rem;
             font-size: 0.8rem;
+            backdrop-filter: blur(4px);
         }
         .stats-overlay .stat { display: flex; justify-content: space-between; gap: 10px; }
         .stats-overlay .stat .label { color: #888; }
@@ -335,72 +336,69 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 <body>
     <div class="status-bar">
         <span><span class="status-dot"></span>Online</span>
-        <span id="connection-status">Spouštím...</span>
+        <span id="connection-status">Connecting...</span>
     </div>
     <div class="header">
         <div>
-            <h1>🛸 Drone AI Detekční systém</h1>
-            <div class="subtitle">AI detekce lidí a aut (termální)</div>
+            <h1>Drone AI — Thermal Detection</h1>
+            <div class="subtitle">AI-powered drone detection system</div>
         </div>
         <div style="text-align: right; font-size: 0.8rem; color: #888;">
-            <div id="connect-info">---.---.---.---</div>
+            <div id="connect-info">localhost</div>
         </div>
     </div>
     <div class="video-container">
         <img src="/stream.mjpeg" alt="Live Feed" id="video-feed">
         <div class="stats-overlay">
-            <div class="stat"><span class="label">Detekce:</span> <span class="value" id="det-count">0</span></div>
+            <div class="stat"><span class="label">Detections:</span> <span class="value" id="det-count">0</span></div>
             <div class="stat"><span class="label">FPS:</span> <span class="value" id="live-fps">0.0</span></div>
-            <div class="stat"><span class="label">Latence:</span> <span class="value" id="latency">0.0 ms</span></div>
+            <div class="stat"><span class="label">Latency:</span> <span class="value" id="latency">0.0 ms</span></div>
         </div>
     </div>
     <div class="bottom-panel">
         <div class="telemetry-grid">
-            <div class="telemetry-card"><div class="label">Baterie</div><div class="value" id="bat">--%</div></div>
-            <div class="telemetry-card"><div class="label">Altituda</div><div class="value" id="alt">-- m</div></div>
-            <div class="telemetry-card"><div class="label">Pozice</div><div class="value" id="pos">--, --</div></div>
-            <div class="telemetry-card"><div class="label">Nálož</div><div class="value" id="heading">--°</div></div>
+            <div class="telemetry-card"><div class="label">Battery</div><div class="value" id="bat">--%</div></div>
+            <div class="telemetry-card"><div class="label">Altitude</div><div class="value" id="alt">-- m</div></div>
+            <div class="telemetry-card"><div class="label">Position</div><div class="value" id="pos">--, --</div></div>
+            <div class="telemetry-card"><div class="label">Heading</div><div class="value" id="heading">--°</div></div>
         </div>
         <ul class="detections" id="det-list">
-            <li class="empty-msg">Čekání na detekce...</li>
+            <li class="empty-msg">Waiting for detections...</li>
         </ul>
     </div>
 <script>
-let reconnectAttempts = 0;
-const maxReconnects = 10;
+// Poll stats every 300ms
+setInterval(async function() {
+    try {
+        const res = await fetch('/api/stats');
+        const data = await res.json();
 
-function updateStats() {
-    fetch('/api/stats')
-        .then(r => r.json())
-        .then(data => {
-            document.getElementById('det-count').textContent = data.total_detections;
-            document.getElementById('live-fps').textContent = data.fps.toFixed(1);
-            document.getElementById('latency').textContent = data.model_latency_ms || 0;
-            document.getElementById('bat').textContent = data.drone_state.battery_pct.toFixed(0) + '%';
-            document.getElementById('alt').textContent = data.drone_state.altitude_m.toFixed(1) + ' m';
-            document.getElementById('pos').textContent = data.drone_state.latitude.toFixed(5) + ', ' + data.drone_state.longitude.toFixed(5);
-            document.getElementById('heading').textContent = data.drone_state.heading_deg.toFixed(0) + '°';
+        document.getElementById('det-count').textContent = data.total_detections;
+        document.getElementById('live-fps').textContent = data.fps.toFixed(1);
+        document.getElementById('latency').textContent = data.model_latency_ms || 0;
 
-            // Detekce
-            const list = document.getElementById('det-list');
-            if (data.boxes && data.boxes.length > 0) {
-                list.innerHTML = data.boxes.map(b =>
-                    '<li><span class="cls">' + b.class + '</span>' +
-                    '<span class="conf">' + b.confidence.toFixed(2) + '</span>' +
-                    '<span class="ts">' + b.timestamp || '' + '</span></li>'
-                ).join('');
-            } else {
-                list.innerHTML = '<li class="empty-msg">Žádné detekce</li>';
-            }
-        })
-        .catch(err => {
-            document.getElementById('connection-status').textContent = 'Offline - retrying...';
-            reconnectAttempts++;
-        });
-}
+        // Telemetry
+        const dt = data.drone_state;
+        document.getElementById('bat').textContent = dt.battery_pct > 0 ? dt.battery_pct.toFixed(0) + '%' : '--%';
+        document.getElementById('alt').textContent = dt.altitude_m.toFixed(1) + ' m';
+        document.getElementById('pos').textContent = dt.latitude.toFixed(5) + ', ' + dt.longitude.toFixed(5);
+        document.getElementById('heading').textContent = dt.heading_deg.toFixed(0) + '°';
 
-// Poll stats
-setInterval(updateStats, 300);
+        // Detections list
+        const list = document.getElementById('det-list');
+        if (data.boxes && data.boxes.length > 0) {
+            list.innerHTML = data.boxes.map(b =>
+                '<li><span class="cls">' + b.class + '</span>' +
+                '<span class="conf">' + b.confidence.toFixed(2) + '</span>' +
+                '<span class="ts">' + (b.timestamp || '') + '</span></li>'
+            ).join('');
+        } else {
+            list.innerHTML = '<li class="empty-msg">No detections</li>';
+        }
+    } catch(e) {
+        document.getElementById('connection-status').textContent = 'Offline - retrying...';
+    }
+}, 300);
 </script>
 </body>
 </html>"""
