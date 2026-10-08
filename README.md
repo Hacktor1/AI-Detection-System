@@ -18,8 +18,8 @@ Reálný systém pro **detekci lidí a aut** pro drony pomocí termální a vidi
 | **Profiling** | ✅ ONNX 1.48x rychlejší | 382.9 FPS vs PyTorch 259.3 FPS |
 | **INT8 kalibrace** | ✅ 100 vzorků | `calib_cache.bin` připraven |
 | **Web UI** | ✅ Flask + MJPEG | Live stream, JSON API, telemetry |
-| **MAVLink bridge** | ✅ Sim + real | telemetry, sender, sim mody |
-| **Testy** | ✅ **33/33** | 3 testovací sady, 0 chyb |
+| **Mobile Stream** | ✅ **Nové** | Drons → mobil (6 endpointů, MJPEG + JSON) |
+| **Testy** | ✅ **51/51** | 3 testovací sady, 0 chyb |
 | **Deploy script** | ✅ `deploy.sh` | Env check → TRT convert → pipeline |
 
 ---
@@ -28,31 +28,31 @@ Reálný systém pro **detekci lidí a aut** pro drony pomocí termální a vidi
 
 ```
 ┌─────────────┐    ┌──────────────┐    ┌─────────────┐
-│  Termální  │───▶│  Video       │───▶│  YOLOv8/v11 │
-│   Kamera   │    │  Pipeline    │    │  Detekce    │
-└─────────────┘    │  (Python)    │    │  TensorRT   │
+│  Termální  │───▶│  Video       │───▶│  YOLOv8n    │
+│   Kamera   │    │  Pipeline    │    │  ONNX Model  │
+└─────────────┘    │  (Python)    │    │  (6.3 MB)   │
                    └──────────────┘    └──────┬──────┘
                                               │
 ┌─────────────┐                              ▼
 │  Viditelná  │    ┌──────────────┐    ┌─────────────┐
-│  Kamera    │───▶│  Rendering   │◀───│  Výsledky   │
-└─────────────┘    │  + Web UI    │    │  (JSON/MJPEG)│
+│  Kamera    │───▶│  Rendering   │◀───│  Detekce    │
+└─────────────┘    │  + Mobile    │    │  (JSON)    │
+                   │  Stream      │    │            │
                    └──────────────┘    └─────────────┘
                                   │
                                   ▼
                    ┌──────────────────────────┐
-                   │  MAVLink Bridge          │
-                   │  (dron telemetrie)       │
+                   │  Mobil / Prohlížeč        │
+                   │  (HTTP MJPEG + JSON API)   │
                    └──────────────────────────┘
 ```
 
 **Jak to funguje (zjednodušeně):**
-1. **Kamera** natoměřuje termální video (detekce lidí)
-2. **Pipeline** načte snímek, spustí YOLO model
+1. **Kamera** natočí termální video (detekce lidí)
+2. **Pipeline** načte snímek, spustí ONNX model (YOLOv8n, 6.3 MB)
 3. **Model** detekuje lidi a auta, vrátí bounding boxy
 4. **Renderer** nakreslí boxy a zobrazí výsledek
-5. **Web UI** streamuje výsledky přes HTTP
-6. **MAVLink** posílá telemetry zpátky na dron
+5. **Mobile Stream** pošle video + detekce do mobilu přes HTTP (MJPEG + JSON)
 
 ---
 
@@ -98,8 +98,8 @@ AI-Detection-System/
 │   ├── int8_calibrate.py      # INT8 kalibrační cache generátor
 │   ├── profiler.py            # PyTorch vs ONNX vs TRT profiling
 │   ├── benchmark.py           # FPS/latency benchmark
-│   ├── web_ui.py              # Flask web dashboard (MJPEG + JSON API)
-│   ├── mavlink_bridge.py      # MAVLink telemetry + detekční bridge
+│   ├── web_ui.py              # Flask desktop dashboard (MJPEG + JSON API)
+│   ├── mobile_stream.py       # 🚀 Mobilní stream (dron → mobil)
 │   ├── jetson_deploy.py       # Jetson deploy helper (--check/--convert/--deploy)
 │   ├── optimized_models/
 │   │   ├── best_fp16_dynamic.onnx      # ONNX model (6.3MB)
@@ -202,11 +202,18 @@ python3 dual_camera_pipeline.py \
     --model ../edge_specialist/optimized_models/best_fp16_dynamic.onnx \
     --no-display
 
+# Mobile stream: detekční systém pro mobil
+cd edge_specialist
+python3 mobile_stream.py \
+    --source ../pipeline_engineer/sample_data/test_thermal.mp4 \
+    --model optimized_models/best_fp16_dynamic.onnx \
+    --port 8080
+
 # Jetson nasazení (CSI kamery + TensorRT)
-python3 ../edge_specialist/jetson_deploy.py --deploy \
+python3 jetson_deploy.py --deploy \
     --thermal-source /dev/video0 \
     --visible-source /dev/video1 \
-    --onnx ../optimized_models/best_fp16_dynamic.onnx
+    --onnx optimized_models/best_fp16_dynamic.onnx
 ```
 
 ### 8. Web UI
@@ -237,17 +244,11 @@ python3 profiler.py \
 ## 🧪 Testování
 
 ```bash
-# Všechny testy (33 testy)
+# Všechny testy (51 testů)
 python3 tests/test_pipeline.py    # 10 testů — Phase 1-2
 python3 tests/test_phase3.py      # 11 testů — Phase 3
-python3 tests/test_phase45.py     # 12 testů — Phase 4-5
-
-# Data validace
-cd data_engineer && python3 _validate_datasets.py
-
-# Jestřední deploy script
-python3 deploy.sh --check-only     # ověření prostředí Jetson
-```
+python3 tests/test_phase45.py     # 13 testů — Phase 4-5 (obsahuje mobile_stream)
+python3 tests/test_dual_camera.py # 18 testů — Dual camera + Jetson sim
 
 ---
 

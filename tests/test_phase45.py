@@ -6,13 +6,9 @@ Tests:
 1. Profiler runs and produces valid JSON output
 2. INT8 calibration cache is created
 3. Web UI module imports cleanly
-4. MAVLink bridge module imports and sim mode works
+4. Mobile Stream module imports and runs
 5. Export to ONNX produces valid file
 6. convert_to_trt dry-run produces correct command
-
-Usage:
-    python tests/test_phase45.py
-    python -m pytest tests/test_phase45.py -v
 """
 import json
 import os
@@ -27,7 +23,6 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from edge_specialist.export_to_onnx import export_to_onnx
 from edge_specialist.int8_calibrate import run_calibration
-from edge_specialist.convert_to_trt import build_trtexec_command, parse_shape
 from edge_specialist.convert_to_trt import build_trtexec_command, parse_shape
 from types import SimpleNamespace
 
@@ -56,6 +51,7 @@ SAMPLE_VIDEO = PROJECT_ROOT / "pipeline_engineer" / "sample_data" / "test_therma
 VAL_TXT = PROJECT_ROOT / "data_engineer" / "datasets" / "processed" / "combined" / "val.txt"
 PROFILE_RESULTS = PROJECT_ROOT / "edge_specialist" / "results" / "profile_results.json"
 CALIB_CACHE = PROJECT_ROOT / "edge_specialist" / "optimized_models" / "calib_cache.bin"
+MOBILE_STREAM = PROJECT_ROOT / "edge_specialist" / "mobile_stream.py"
 
 
 def test_profiler_loads_video_frames():
@@ -120,13 +116,6 @@ def test_parse_shape():
 def test_web_ui_importable():
     """Web UI module imports without errors."""
     try:
-        import importlib
-        # Try importing without starting the Flask server
-        spec = importlib.util.spec_from_file_location(
-            "web_ui", PROJECT_ROOT / "edge_specialist" / "web_ui.py"
-        )
-        mod = importlib.util.module_from_spec(spec)
-        # Don't execute — just check it parses
         import py_compile
         py_compile.compile(str(PROJECT_ROOT / "edge_specialist" / "web_ui.py"), doraise=True)
         assert True
@@ -134,40 +123,47 @@ def test_web_ui_importable():
         pytest.fail(f"web_ui.py failed to compile: {e}")
 
 
-def test_mavlink_bridge_importable():
-    """MAVLink bridge module imports cleanly."""
+def test_mobile_stream_importable():
+    """Mobile Stream module imports and has required components."""
     try:
-        import importlib
-        spec = importlib.util.spec_from_file_location(
-            "mavlink_bridge", PROJECT_ROOT / "edge_specialist" / "mavlink_bridge.py"
-        )
-        mod = importlib.util.module_from_spec(spec)
         import py_compile
-        py_compile.compile(str(PROJECT_ROOT / "edge_specialist" / "mavlink_bridge.py"), doraise=True)
+        py_compile.compile(str(MOBILE_STREAM), doraise=True)
         assert True
     except Exception as e:
-        pytest.fail(f"mavlink_bridge.py failed to compile: {e}")
+        pytest.fail(f"mobile_stream.py failed to compile: {e}")
 
 
-def test_mavlink_bridge_sim_mode():
-    """MAVLink bridge simulation mode produces valid drone state."""
-    from edge_specialist.mavlink_bridge import DroneState
+def test_mobile_stream_has_endpoints():
+    """Mobile Stream Flask app defines expected routes."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("mobile_stream", str(MOBILE_STREAM))
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    
+    # Check Flask routes are registered
+    rules = {rule.rule for rule in mod.app.url_map.iter_rules()}
+    assert "/" in rules
+    assert "/stream.mjpeg" in rules
+    assert "/api/stats" in rules
+    assert "/api/telemetry" in rules
+    assert "/api/detections" in rules
+    assert "/api/system" in rules
+    print(f"  Routes found: {sorted(rules)}")
 
-    drone = DroneState()
-    state = drone.to_dict()
-    assert "battery_pct" in state
-    assert "altitude_m" in state
-    assert "latitude" in state
-    assert "longitude" in state
 
-    # Simulate a few updates with simulated time gaps
-    import time
-    # Force battery drain by simulating elapsed time manually
-    drone.last_update = time.time() - 10  # 10 seconds in the past
-    drone.update()
-    updated = drone.to_dict()
-    assert updated["battery_pct"] < 100, "Battery should drain over time"
-    assert updated["altitude_m"] > 0, "Altitude should increase"
+def test_mobile_stream_serverstate():
+    """Mobile Stream ServerState initializes correctly."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("mobile_stream", str(MOBILE_STREAM))
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    
+    ss = mod.ServerState()
+    assert ss.running is True
+    assert ss.fps == 0.0
+    assert ss.boxes == []
+    assert "battery_pct" in ss.telemetry
+    assert "altitude_m" in ss.telemetry
 
 
 def test_dual_camera_pipeline_exists_and_runnable():
@@ -205,8 +201,9 @@ if __name__ == "__main__":
         test_convert_to_trt_dry_run_command,
         test_parse_shape,
         test_web_ui_importable,
-        test_mavlink_bridge_importable,
-        test_mavlink_bridge_sim_mode,
+        test_mobile_stream_importable,
+        test_mobile_stream_has_endpoints,
+        test_mobile_stream_serverstate,
         test_dual_camera_pipeline_exists_and_runnable,
         test_onnx_model_not_empty,
         test_calib_cache_has_content,
@@ -214,7 +211,6 @@ if __name__ == "__main__":
 
     passed = 0
     failed = 0
-
     for test_fn in test_functions:
         try:
             test_fn()
