@@ -1,0 +1,33 @@
+{
+  "timestamp": "20261008_161305",
+  "video": "pipeline_engineer/sample_data/test_thermal.mp4",
+  "model": "edge_specialist/optimized_models/best_fp16_dynamic.onnx",
+  "total_frames_processed": 10,
+  "total_detections": 0,
+  "detections_per_class": {},
+  "avg_inference_ms": 31.86,
+  "avg_fps": 31.4,
+  "confidence_threshold": 0.1,
+  "model_size_kb": 6492,
+  "output_file": "/home/hacktor/Projects/GitHub-Hacktor1/AI-Detection-System/results/sim_detections_20261008_161305.json",
+  "sample_results": [
+    {
+      "frame": 0,
+      "timestamp": 0.0,
+      "inference_ms": 36.54,
+      "detections": []
+    },
+    {
+      "frame": 3,
+      "timestamp": 0.6,
+      "inference_ms": 45.05,
+      "detections": []
+    },
+    {
+      "frame": 6,
+      "timestamp": 1.2,
+      "inference_ms": 32.3,
+      "detections": []
+    }
+  ]
+}

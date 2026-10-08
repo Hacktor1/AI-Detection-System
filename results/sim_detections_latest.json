@@ -1,0 +1,62 @@
+[
+  {
+    "frame": 0,
+    "timestamp": 0.0,
+    "inference_ms": 36.54,
+    "detections": []
+  },
+  {
+    "frame": 3,
+    "timestamp": 0.6,
+    "inference_ms": 45.05,
+    "detections": []
+  },
+  {
+    "frame": 6,
+    "timestamp": 1.2,
+    "inference_ms": 32.3,
+    "detections": []
+  },
+  {
+    "frame": 9,
+    "timestamp": 1.8,
+    "inference_ms": 25.17,
+    "detections": []
+  },
+  {
+    "frame": 12,
+    "timestamp": 2.4,
+    "inference_ms": 36.96,
+    "detections": []
+  },
+  {
+    "frame": 15,
+    "timestamp": 3.0,
+    "inference_ms": 29.84,
+    "detections": []
+  },
+  {
+    "frame": 18,
+    "timestamp": 3.6,
+    "inference_ms": 29.0,
+    "detections": []
+  },
+  {
+    "frame": 21,
+    "timestamp": 4.2,
+    "inference_ms": 23.85,
+    "detections": []
+  },
+  {
+    "frame": 24,
+    "timestamp": 4.8,
+    "inference_ms": 23.6,
+    "detections": []
+  },
+  {
+    "frame": 27,
+    "timestamp": 5.4,
+    "inference_ms": 36.32,
+    "detections": []
+  }
+]
