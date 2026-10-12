@@ -166,20 +166,27 @@ def capture_loop(args):
         # Resize pro kontrolu velikosti (YOLO akceptuje libovolné)
         display_frame = frame.copy()
 
+        # Valid detection classes for our 5-class system
+        # YOLOv8s COCO classes: 0=person, 1=bicycle, 2=car, 3=motorcycle, 5=bus, 7=truck, 16=dog
+        VALID_CLASSES = {0: 0, 1: 2, 2: 1, 3: 4, 5: 4, 7: 4, 16: 3}
+        CLASS_MAPPING = {0: "person", 1: "car", 2: "bicycle", 3: "dog", 4: "other_vehicle"}
+
         # Inference
         boxes = []
         if model is not None and hasattr(model, "predict"):
             t0 = time.time()
             try:
-                results = model.predict(frame, conf=args.conf_thres, verbose=False)[0]
+                results = model.predict(frame, conf=max(args.conf_thres, 0.05), verbose=False)[0]
                 for box in results.boxes:
                     cls_id = int(box.cls[0])
+                    if cls_id not in VALID_CLASSES:
+                        continue
                     conf = float(box.conf[0])
                     x1, y1, x2, y2 = box.xyxy[0].tolist()
-                    cls_name = model.names.get(cls_id, "unknown")
+                    mapped_class = CLASS_MAPPING[VALID_CLASSES[cls_id]]
                     boxes.append({
-                        "class": cls_name,
-                        "class_id": cls_id,
+                        "class": mapped_class,
+                        "class_id": VALID_CLASSES[cls_id],
                         "confidence": round(conf, 3),
                         "bbox": [int(x1), int(y1), int(x2 - x1), int(y2 - y1)],
                     })
